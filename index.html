@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finanzassistent &ndash; Schulden, Steuern &amp; Finanzhilfen</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Finanzassistent</h1>
+  <p class="subtitle">Schuldenplaner, Finanzhilfen-Finder und Steuer-Helfer &mdash; f&uuml;r die Schweiz, Deutschland und &Ouml;sterreich</p>
+</header>
+
+<div class="disclaimer">
+  <strong>Wichtiger Hinweis:</strong> Dieses Programm gibt unverbindliche Sch&auml;tzungen und Informationen. Es ersetzt keine
+  Steuererkl&auml;rung, keine Rechtsberatung und keine offizielle Schuldenberatung. Bitte pr&uuml;fe alle Ergebnisse und wende dich
+  bei wichtigen Entscheidungen an eine offizielle Beratungsstelle (siehe Abschnitt &laquo;Hilfe in deiner Region&raquo; unten).
+  Alle Eingaben bleiben ausschliesslich in diesem Browser gespeichert &mdash; es werden keine Daten an einen Server &uuml;bertragen.
+</div>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="debt-planner">Schuldenplaner</button>
+  <button class="tab-btn" data-tab="benefits-finder" disabled>Finanzhilfen-Finder <span class="badge">bald verf&uuml;gbar</span></button>
+  <button class="tab-btn" data-tab="tax-helper" disabled>Steuer-Helfer <span class="badge">bald verf&uuml;gbar</span></button>
+</nav>
+
+<main>
+
+  <section id="region-picker" class="card">
+    <h2>Region ausw&auml;hlen</h2>
+    <div class="region-fields">
+      <label>
+        Land
+        <select id="country-select"></select>
+      </label>
+      <label>
+        <span id="subdivision-label">Kanton</span>
+        <select id="subdivision-select"></select>
+      </label>
+    </div>
+    <p id="region-status" class="region-status"></p>
+  </section>
+
+  <section id="debt-planner" class="tab-panel card active">
+    <h2>Schuldenplaner</h2>
+    <p>Erfasse alle Schulden mit Betrag, Zinssatz und monatlicher Mindestzahlung. Der Planer berechnet, in welcher Reihenfolge
+       du sie am g&uuml;nstigsten abbezahlst.</p>
+
+    <table id="debt-table" class="debt-table">
+      <thead>
+        <tr>
+          <th>Bezeichnung</th>
+          <th>Restschuld (CHF)</th>
+          <th>Zinssatz (% pro Jahr)</th>
+          <th>Mindestzahlung / Monat (CHF)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="debt-table-body"></tbody>
+    </table>
+    <button id="add-debt-btn" type="button" class="secondary-btn">+ Schuld hinzuf&uuml;gen</button>
+
+    <div class="strategy-settings">
+      <label>
+        Zus&auml;tzlicher Betrag pro Monat, der f&uuml;r Schulden zur Verf&uuml;gung steht (CHF)
+        <input type="number" id="extra-payment" min="0" step="10" value="0">
+      </label>
+
+      <fieldset class="strategy-fieldset">
+        <legend>Strategie</legend>
+        <label class="radio-label">
+          <input type="radio" name="strategy" value="avalanche" checked>
+          Lawine &mdash; zuerst die Schuld mit dem h&ouml;chsten Zinssatz (spart am meisten Geld)
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="strategy" value="snowball">
+          Schneeball &mdash; zuerst die kleinste Schuld (schnellere Erfolgserlebnisse)
+        </label>
+      </fieldset>
+    </div>
+
+    <button id="calculate-btn" type="button" class="primary-btn">Plan berechnen</button>
+
+    <div id="results" class="results"></div>
+  </section>
+
+  <section id="resources" class="card">
+    <h2>Hilfe in deiner Region</h2>
+    <div id="resources-content"></div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Keine offizielle Steuer- oder Rechtsberatung. Alle Berechnungen erfolgen lokal in deinem Browser.</p>
+</footer>
+
+<script src="js/regions.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/debtPlanner.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

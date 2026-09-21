@@ -1,0 +1,106 @@
+/*
+ * Debt payoff simulation: avalanche (highest interest first) or
+ * snowball (smallest balance first). Every month, interest accrues on
+ * every debt, minimum payments are made on every debt, and any leftover
+ * "extra" budget is funnelled into the current target debt. Once a debt
+ * hits zero, its minimum payment is freed up and joins the extra pool for
+ * the next debt in line -- that roll-over is what makes both strategies
+ * pay off debt faster than paying minimums alone.
+ */
+const DebtPlanner = {
+  MAX_MONTHS: 600, // 50 years safety cap so a bad input can't loop forever
+
+  simulate(inputDebts, extraMonthly, strategy) {
+    const debts = inputDebts.map((d) => ({
+      id: d.id,
+      name: d.name,
+      balance: Number(d.balance) || 0,
+      apr: Number(d.apr) || 0,
+      minPayment: Number(d.minPayment) || 0
+    }));
+
+    if (debts.length === 0) {
+      return { feasible: true, empty: true };
+    }
+
+    const order = this._sortOrder(debts, strategy);
+    const payoffMonth = {};
+    const interestPaid = {};
+    order.forEach((id) => {
+      payoffMonth[id] = null;
+      interestPaid[id] = 0;
+    });
+
+    const balanceHistory = [debts.reduce((sum, d) => sum + d.balance, 0)];
+    let totalInterestPaid = 0;
+    let month = 0;
+    let extraPool = Number(extraMonthly) || 0;
+
+    while (debts.some((d) => d.balance > 0.005) && month < this.MAX_MONTHS) {
+      month++;
+      let freedUpThisMonth = 0;
+
+      // 1. accrue interest and pay the minimum on every open debt
+      for (const debt of debts) {
+        if (debt.balance <= 0.005) continue;
+        const monthlyInterest = (debt.balance * (debt.apr / 100)) / 12;
+        debt.balance += monthlyInterest;
+        totalInterestPaid += monthlyInterest;
+        interestPaid[debt.id] += monthlyInterest;
+
+        const payment = Math.min(debt.minPayment, debt.balance);
+        debt.balance -= payment;
+
+        if (debt.balance <= 0.005 && payoffMonth[debt.id] === null) {
+          payoffMonth[debt.id] = month;
+          freedUpThisMonth += debt.minPayment - payment; // usually 0, but keep it exact
+        }
+      }
+
+      // 2. funnel the extra budget (plus anything freed up) into the target debt(s), in order
+      let available = extraPool + freedUpThisMonth;
+      for (const id of order) {
+        if (available <= 0) break;
+        const debt = debts.find((d) => d.id === id);
+        if (!debt || debt.balance <= 0.005) continue;
+        const payment = Math.min(available, debt.balance);
+        debt.balance -= payment;
+        available -= payment;
+        if (debt.balance <= 0.005 && payoffMonth[debt.id] === null) {
+          payoffMonth[debt.id] = month;
+        }
+      }
+
+      balanceHistory.push(debts.reduce((sum, d) => sum + Math.max(d.balance, 0), 0));
+    }
+
+    const feasible = debts.every((d) => d.balance <= 0.005);
+
+    return {
+      feasible,
+      empty: false,
+      totalMonths: month,
+      totalInterestPaid,
+      balanceHistory,
+      order: order.map((id) => {
+        const original = inputDebts.find((d) => d.id === id);
+        return {
+          id,
+          name: original.name,
+          payoffMonth: payoffMonth[id],
+          interestPaid: interestPaid[id]
+        };
+      })
+    };
+  },
+
+  _sortOrder(debts, strategy) {
+    const copy = [...debts];
+    if (strategy === "snowball") {
+      copy.sort((a, b) => a.balance - b.balance);
+    } else {
+      copy.sort((a, b) => b.apr - a.apr);
+    }
+    return copy.map((d) => d.id);
+  }
+};
