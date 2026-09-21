@@ -10,17 +10,11 @@ kontaktieren (siehe Abschnitt "Hilfe in deiner Region" in der App).
 
 **Privatsph&auml;re:** Es gibt keinen Server und keine Datenbank. Alle Eingaben (Schulden,
 Betr&auml;ge usw.) werden nur im Browser der Person gespeichert, die die Seite ge&ouml;ffnet hat
-(`localStorage`). Es wird nichts irgendwohin verschickt.
-
-**Mehrere Personen auf demselben Ger&auml;t:** Beim &Ouml;ffnen fragt die App nach einem Namen
-oder selbst ausgedachten Kennwort und rechnet daraus einen eigenen, komplett getrennten Bereich aus
-&mdash; jede Eingabe bekommt ihre eigenen Zahlen, andere Eingaben starten leer. Es gibt **keine
-Liste gespeicherter Namen** und **kein automatisches Wiedereinloggen**: jeder Seitenaufruf zeigt
-ein leeres Eingabefeld, ganz ohne Hinweis darauf, wer die App vorher benutzt hat. Das ist kein
-echter Passwortschutz (wer denselben Text eingibt, z.B. denselben h&auml;ufigen Vornamen, landet im
-selben Bereich), sondern trennt nur die Ansicht, damit sich Familienmitglieder oder auch fremde
-Personen am selben Ger&auml;t nicht gegenseitig ihre Zahlen zeigen. Mit "Abmelden" oben in der App
-kehrt man jederzeit zum leeren Eingabefeld zur&uuml;ck.
+(`localStorage`). Es wird nichts irgendwohin verschickt. Jedes Ger&auml;t/jeder Browser hat seinen
+eigenen, unabh&auml;ngigen Speicher &mdash; wenn jede Person die App auf ihrem eigenen Handy oder
+Laptop &ouml;ffnet, sieht sie automatisch nur ihre eigenen Zahlen, ganz ohne Login oder Profilwahl.
+(Nur wer sich denselben Browser auf demselben Ger&auml;t teilt, teilt auch dieselben gespeicherten
+Daten.)
 
 ## Aktueller Stand
 
@@ -93,8 +87,7 @@ index.html            Seitenstruktur (HTML)
 css/style.css          Aussehen (hell/dunkel, mobilfreundlich)
 js/regions.js          Alle L&auml;nder/Kantone/Bundesl&auml;nder + regionale Infos (St. Gallen ausgef&uuml;llt)
 js/creditorTypes.js    Gl&auml;ubiger-Typen zur Kategorisierung (Vermieter, Krankenkasse, AHV/IV, ...)
-js/profiles.js         Wandelt Name/Kennwort in eine Speicher-ID um, speichert selbst nichts
-js/storage.js          Speichern/Laden im Browser (localStorage), pro Profil getrennt
+js/storage.js          Speichern/Laden im Browser (localStorage)
 js/debtPlanner.js      Die eigentliche Berechnung des Abzahlungsplans
 js/chart.js            Einfaches Diagramm (Restschuld &uuml;ber Zeit), ohne externe Bibliothek
 js/app.js              Verbindet alles: F&uuml;llt die Seite, reagiert auf Klicks/Eingaben

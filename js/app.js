@@ -1,12 +1,8 @@
 (function () {
-  // populated by startApp() once a profile is chosen -- nothing below
-  // this point touches Storage before that happens
-  let debts, income, fixedCosts, settings, nextDebtId, nextIncomeId, nextFixedCostId;
-
-  // tracks the value we last set extra-payment to automatically, so we can
-  // tell "still following the computed maximum" apart from "user typed
-  // their own amount" without a separate flag
-  let lastAutoExtra = null;
+  let debts = Storage.loadDebts();
+  let income = Storage.loadIncome();
+  let fixedCosts = Storage.loadFixedCosts();
+  const settings = Object.assign({ country: "CH", subdivision: "SG" }, Storage.loadSettings());
 
   const countrySelect = document.getElementById("country-select");
   const subdivisionSelect = document.getElementById("subdivision-select");
@@ -21,17 +17,14 @@
   const extraPaymentSuggestion = document.getElementById("extra-payment-suggestion");
   const resultsEl = document.getElementById("results");
 
-  function startApp(profileId) {
-    Storage.setProfile(profileId);
-    debts = Storage.loadDebts();
-    income = Storage.loadIncome();
-    fixedCosts = Storage.loadFixedCosts();
-    settings = Object.assign({ country: "CH", subdivision: "SG" }, Storage.loadSettings());
-    nextDebtId = debts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
-    nextIncomeId = income.reduce((max, d) => Math.max(max, d.id), 0) + 1;
-    nextFixedCostId = fixedCosts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
-    init();
-  }
+  let nextDebtId = debts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+  let nextIncomeId = income.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+  let nextFixedCostId = fixedCosts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+
+  // tracks the value we last set extra-payment to automatically, so we can
+  // tell "still following the computed maximum" apart from "user typed
+  // their own amount" without a separate flag
+  let lastAutoExtra = null;
 
   function init() {
     Object.keys(REGIONS).forEach((code) => {
@@ -530,20 +523,8 @@
     return "CHF " + Math.round(v).toLocaleString("de-CH");
   }
 
-  // ---- Access (gates everything above) ----
-  // No roster of names is ever stored or shown, and nothing about a
-  // previous visit is remembered: every page load starts at a blank
-  // entry field. What's typed is hashed straight into a storage
-  // namespace (see js/profiles.js) -- nothing to see for whoever opens
-  // this next unless they type the exact same text themselves.
-
-  const profilePickerEl = document.getElementById("profile-picker");
-  const profileForm = document.getElementById("profile-form");
-  const profileKeyInput = document.getElementById("profile-key-input");
-  const appContentEl = document.getElementById("app-content");
-
-  // best-effort cleanup of the old roster-based approach's data, which
-  // stored plaintext names -- exactly what this replaces
+  // best-effort cleanup of leftover data from an earlier per-browser-profile
+  // approach (which stored plaintext names) -- no longer used
   try {
     localStorage.removeItem("ssv_profiles_v1");
     localStorage.removeItem("ssv_last_profile_id");
@@ -551,21 +532,5 @@
     /* ignore */
   }
 
-  profileForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const raw = profileKeyInput.value.trim();
-    if (!raw) {
-      profileKeyInput.focus();
-      return;
-    }
-    profilePickerEl.hidden = true;
-    appContentEl.hidden = false;
-    startApp(deriveProfileId(raw));
-  });
-
-  document.getElementById("logout-btn").addEventListener("click", () => {
-    // reload rather than manually resetting in-memory state -- guarantees
-    // nothing from this session lingers for whoever uses the browser next
-    location.reload();
-  });
+  init();
 })();
