@@ -22,13 +22,12 @@ Betr&auml;ge usw.) werden nur im Browser der Person gespeichert, die die Seite g
 | Steuer-Helfer (Sch&auml;tzung/Checkliste f&uuml;r die Steuererkl&auml;rung) | 🔜 sp&auml;ter geplant |
 | Regionen mit echten Daten hinterlegt | Kanton St. Gallen (Schweiz) |
 
-Der Schuldenplaner zahlt bewusst **alle offenen Schulden gleichzeitig** ab, statt eine nach der
-anderen: jede bekommt ihre Mindestzahlung, und der monatliche Zusatzbetrag (automatisch berechnet
-aus Einkommen minus Fixkosten minus Mindestzahlungen) wird gleich auf alle aufgeteilt. Frei
-gewordene Mindestzahlungen (sobald eine Schuld fertig ist) flie&szlig;en sofort in die restlichen
-Schulden. `js/creditorTypes.js` und `DebtPlanner.simulate()` unterst&uuml;tzen technisch noch
-weitere Strategien (z.B. nach Zinssatz oder Dringlichkeit), diese sind aber aktuell nicht in der
-Oberfl&auml;che ausw&auml;hlbar.
+Der Schuldenplaner geht bewusst **ohne Mindestzahlungen** aus: unbezahlte Rechnungen und
+Betreibungen haben meist keine vertragliche Mindestrate wie eine Kreditkarte, man zahlt schlicht
+noch nichts darauf. Stattdessen wird der komplette monatlich verf&uuml;gbare Betrag (Einkommen
+minus Fixkosten, automatisch berechnet) **gleich auf alle offenen Schulden aufgeteilt** und zahlt
+sie parallel ab, statt eine nach der anderen. Sobald eine Schuld fertig ist, wird ihr Anteil auf
+die restlichen umverteilt.
 
 Die Regionsauswahl (Land + Kanton/Bundesland) ist schon f&uuml;r alle Kantone der Schweiz sowie
 alle Bundesl&auml;nder Deutschlands und &Ouml;sterreichs vorbereitet ("Bald verf&uuml;gbar"), damit sich
@@ -76,7 +75,7 @@ Seite &ouml;ffentlich erreichbar ist &mdash; niemand ausser ihr sieht ihre Eintr
 index.html            Seitenstruktur (HTML)
 css/style.css          Aussehen (hell/dunkel, mobilfreundlich)
 js/regions.js          Alle L&auml;nder/Kantone/Bundesl&auml;nder + regionale Infos (St. Gallen ausgef&uuml;llt)
-js/creditorTypes.js    Gl&auml;ubiger-Typen (Vermieter, Krankenkasse, AHV/IV, ...) + Dringlichkeit
+js/creditorTypes.js    Gl&auml;ubiger-Typen zur Kategorisierung (Vermieter, Krankenkasse, AHV/IV, ...)
 js/storage.js          Speichern/Laden im Browser (localStorage)
 js/debtPlanner.js      Die eigentliche Berechnung des Abzahlungsplans
 js/chart.js            Einfaches Diagramm (Restschuld &uuml;ber Zeit), ohne externe Bibliothek

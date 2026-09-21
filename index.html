@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finanzassistent &ndash; Schulden, Steuern &amp; Finanzhilfen</title>
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 
@@ -71,8 +71,9 @@
 
   <section id="debt-planner" class="tab-panel card active">
     <h2>Schuldenplaner</h2>
-    <p>Erfasse alle Schulden mit Betrag, Zinssatz und monatlicher Mindestzahlung. Der Planer zahlt sie gleichzeitig ab und
-       zeigt, wie viel monatlich an wen geht, bis alle schuldenfrei sind.</p>
+    <p>Erfasse alle Schulden mit Restschuld und Zinssatz (falls bekannt) &mdash; keine Mindestzahlung n&ouml;tig, du zahlst ja
+       aktuell nichts darauf. Der Planer teilt dein verf&uuml;gbares Geld jeden Monat gleich auf alle auf, bis alle
+       schuldenfrei sind.</p>
 
     <table id="debt-table" class="entry-table debt-table">
       <thead>
@@ -81,7 +82,6 @@
           <th>Gl&auml;ubiger-Typ</th>
           <th>Restschuld (CHF)</th>
           <th>Zinssatz (% pro Jahr)</th>
-          <th>Mindestzahlung / Monat (CHF)</th>
           <th></th>
         </tr>
       </thead>
@@ -91,11 +91,11 @@
 
     <div class="strategy-settings">
       <label>
-        Zus&auml;tzlicher Betrag pro Monat, der f&uuml;r Schulden zur Verf&uuml;gung steht (CHF)
+        Betrag pro Monat, der f&uuml;r Schulden zur Verf&uuml;gung steht (CHF)
         <input type="number" id="extra-payment" min="0" step="10" value="0">
       </label>
       <p id="extra-payment-suggestion" class="suggestion-note"></p>
-      <p class="strategy-note">Alle offenen Schulden werden gleichzeitig bedient: jede bekommt ihre Mindestzahlung, und der Zusatzbetrag wird gleich auf alle aufgeteilt &mdash; niemand wartet, bis eine andere Schuld fertig ist.</p>
+      <p class="strategy-note">Dieser Betrag wird jeden Monat gleich auf alle offenen Schulden aufgeteilt &mdash; keine wartet, bis eine andere fertig ist.</p>
     </div>
 
     <button id="calculate-btn" type="button" class="primary-btn">Plan berechnen</button>
@@ -116,11 +116,11 @@
 
 <!-- ?v=N is a cache-buster: bump it whenever any js/*.js or css file changes,
      so returning visitors get the new version without needing a hard refresh. -->
-<script src="js/regions.js?v=8"></script>
-<script src="js/creditorTypes.js?v=8"></script>
-<script src="js/storage.js?v=8"></script>
-<script src="js/debtPlanner.js?v=8"></script>
-<script src="js/chart.js?v=8"></script>
-<script src="js/app.js?v=8"></script>
+<script src="js/regions.js?v=9"></script>
+<script src="js/creditorTypes.js?v=9"></script>
+<script src="js/storage.js?v=9"></script>
+<script src="js/debtPlanner.js?v=9"></script>
+<script src="js/chart.js?v=9"></script>
+<script src="js/app.js?v=9"></script>
 </body>
 </html>

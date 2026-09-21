@@ -1,9 +1,4 @@
 (function () {
-  // only one payoff strategy is offered: split the extra amount evenly
-  // across every open debt so none of them sit untouched while another
-  // one gets paid off first
-  const STRATEGY = "equal";
-
   let debts = Storage.loadDebts();
   let income = Storage.loadIncome();
   let fixedCosts = Storage.loadFixedCosts();
@@ -146,7 +141,7 @@
   // ---- Debts ----
 
   function addDebtRow() {
-    debts.push({ id: nextDebtId++, name: "", balance: "", apr: "", minPayment: "", creditorType: DEFAULT_CREDITOR_TYPE });
+    debts.push({ id: nextDebtId++, name: "", balance: "", apr: "", creditorType: DEFAULT_CREDITOR_TYPE });
     persistDebts();
     renderDebtTable();
   }
@@ -167,7 +162,7 @@
     if (debts.length === 0) {
       const tr = document.createElement("tr");
       const td = document.createElement("td");
-      td.colSpan = 6;
+      td.colSpan = 5;
       td.className = "empty-state";
       td.textContent = "Noch keine Schulden erfasst. Klicke auf «Schuld hinzufügen».";
       tr.appendChild(td);
@@ -181,7 +176,6 @@
       tr.appendChild(makeCreditorTypeCell(debt));
       tr.appendChild(makeInputCell(debt, "balance", "number", "0", persistDebts));
       tr.appendChild(makeInputCell(debt, "apr", "number", "0", persistDebts));
-      tr.appendChild(makeInputCell(debt, "minPayment", "number", "0", persistDebts));
       tr.appendChild(makeRemoveCell(() => removeDebtRow(debt.id)));
       debtTableBody.appendChild(tr);
     });
@@ -307,30 +301,24 @@
     return items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }
 
-  function sumMinPayments() {
-    return debts.reduce((sum, d) => sum + (Number(d.minPayment) || 0), 0);
-  }
-
   function computeAvailableForDebt() {
-    return sumAmounts(income) - sumAmounts(fixedCosts) - sumMinPayments();
+    return sumAmounts(income) - sumAmounts(fixedCosts);
   }
 
   function renderBudgetSummary() {
     const totalIncome = sumAmounts(income);
     const totalFixedCosts = sumAmounts(fixedCosts);
-    const totalMinPayments = sumMinPayments();
     const available = computeAvailableForDebt();
     const maxExtra = Math.max(0, Math.round(available));
 
     budgetSummaryEl.innerHTML = `
       <div class="budget-line"><span>Einkommen</span><span>${formatChf(totalIncome)}</span></div>
       <div class="budget-line"><span>Fixkosten</span><span>&minus; ${formatChf(totalFixedCosts)}</span></div>
-      <div class="budget-line"><span>Mindestzahlungen Schulden</span><span>&minus; ${formatChf(totalMinPayments)}</span></div>
       <div class="budget-line total ${available < 0 ? "negative" : ""}">
-        <span>${available < 0 ? "Fehlbetrag" : "Maximum, das du zusätzlich für Schulden einsetzen kannst"}</span>
+        <span>${available < 0 ? "Fehlbetrag" : "Betrag, der jeden Monat für deine Schulden verfügbar ist"}</span>
         <span>${formatChf(available)}</span>
       </div>
-      ${available < 0 ? '<p class="urgency-reason">Deine Fixkosten und Mindestzahlungen übersteigen dein Einkommen. Wende dich möglichst bald an eine Schuldenberatung (siehe unten) – ggf. gibt es Anspruch auf staatliche Unterstützung.</p>' : ""}
+      ${available < 0 ? '<p class="urgency-reason">Deine Fixkosten übersteigen dein Einkommen. Wende dich möglichst bald an eine Schuldenberatung (siehe unten) – ggf. gibt es Anspruch auf staatliche Unterstützung.</p>' : ""}
     `;
 
     const hasDebt = debts.some((d) => d.name && Number(d.balance) > 0);
@@ -393,7 +381,6 @@
         name: d.name,
         balance: Number(d.balance),
         apr: Number(d.apr) || 0,
-        minPayment: Number(d.minPayment) || 0,
         creditorType: d.creditorType || DEFAULT_CREDITOR_TYPE
       }));
 
@@ -405,7 +392,7 @@
     }
 
     const extra = Number(extraPaymentInput.value) || 0;
-    const result = DebtPlanner.simulate(validDebts, extra, STRATEGY);
+    const result = DebtPlanner.simulate(validDebts, extra);
 
     if (!result.feasible) {
       const warn = document.createElement("div");
@@ -434,7 +421,7 @@
     const planTitle = document.createElement("h3");
     planTitle.textContent = "Zahlungsplan: wie viel wohin, pro Monat";
     resultsEl.appendChild(planTitle);
-    renderPaymentPlan(DebtPlanner.derivePaymentPlan(result.order, extra, STRATEGY));
+    renderPaymentPlan(DebtPlanner.derivePaymentPlan(result.order, extra));
 
     const orderTitle = document.createElement("h3");
     orderTitle.textContent = "Ergebnis pro Schuld";
@@ -466,9 +453,7 @@
 
       const subtitle = document.createElement("p");
       subtitle.className = "phase-subtitle";
-      subtitle.textContent = phase.equalSplit
-        ? `Alle offenen Schulden erhalten gleich viel extra, bis «${phase.targetName}» als erste davon fertig ist.`
-        : `Bis «${phase.targetName}» abbezahlt ist.`;
+      subtitle.textContent = `Alle offenen Schulden erhalten gleich viel, bis «${phase.targetName}» als erste davon fertig ist.`;
       card.appendChild(subtitle);
 
       const list = document.createElement("ul");
@@ -477,11 +462,8 @@
       phase.payments.forEach((p) => {
         total += p.amount;
         const li = document.createElement("li");
-        const isTarget = !phase.equalSplit && p.name === phase.targetName;
-        const isFirstDone = phase.equalSplit && p.name === phase.targetName;
-        const suffix = isTarget ? " (Ziel)" : isFirstDone ? " (zuerst fertig)" : "";
-        li.innerHTML = `<span>${p.name}${suffix}</span><span>${formatChf(p.amount)} / Monat</span>`;
-        if (isTarget) li.className = "target";
+        const isFirstDone = p.name === phase.targetName;
+        li.innerHTML = `<span>${p.name}${isFirstDone ? " (zuerst fertig)" : ""}</span><span>${formatChf(p.amount)} / Monat</span>`;
         list.appendChild(li);
       });
       card.appendChild(list);
