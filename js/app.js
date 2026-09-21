@@ -436,6 +436,46 @@
       list.appendChild(li);
     });
     resultsEl.appendChild(list);
+
+    renderUrgencyComparison(validDebts);
+  }
+
+  /*
+   * Purely informational: ranks the entered debts by how urgent they
+   * typically are to deal with (e.g. AHV/Krankenkasse/Miete tend to
+   * escalate fast), independent of the equal payment split above. Lets
+   * someone see "this one is more urgent than its balance suggests"
+   * even though every debt gets paid the same amount each month.
+   */
+  function renderUrgencyComparison(validDebts) {
+    const title = document.createElement("h3");
+    title.textContent = "Dringlichkeit im Vergleich";
+    resultsEl.appendChild(title);
+
+    const note = document.createElement("p");
+    note.className = "strategy-note";
+    note.textContent = "Nur eine grobe Einschätzung zur Orientierung, keine Rechtsberatung – ändert nichts an der Zahlung oben, alle Schulden werden weiterhin gleich bedient.";
+    resultsEl.appendChild(note);
+
+    const ranked = [...validDebts].sort((a, b) => {
+      const ua = (CREDITOR_TYPE_BY_ID[a.creditorType] || CREDITOR_TYPE_BY_ID[DEFAULT_CREDITOR_TYPE]).urgency;
+      const ub = (CREDITOR_TYPE_BY_ID[b.creditorType] || CREDITOR_TYPE_BY_ID[DEFAULT_CREDITOR_TYPE]).urgency;
+      return ub - ua;
+    });
+
+    const list = document.createElement("div");
+    list.className = "urgency-list";
+    ranked.forEach((debt) => {
+      const type = CREDITOR_TYPE_BY_ID[debt.creditorType] || CREDITOR_TYPE_BY_ID[DEFAULT_CREDITOR_TYPE];
+      const item = document.createElement("div");
+      item.className = "urgency-item";
+      item.innerHTML = `
+        <div class="urgency-item-head"><span>${debt.name}</span><span class="urgency-badge urgency-${type.urgency}">${urgencyLabel(type.urgency)}</span></div>
+        <p class="urgency-reason">${type.label}: ${type.reason}</p>
+      `;
+      list.appendChild(item);
+    });
+    resultsEl.appendChild(list);
   }
 
   function renderPaymentPlan(phases) {

@@ -29,6 +29,13 @@ minus Fixkosten, automatisch berechnet) **gleich auf alle offenen Schulden aufge
 sie parallel ab, statt eine nach der anderen. Sobald eine Schuld fertig ist, wird ihr Anteil auf
 die restlichen umverteilt.
 
+Zus&auml;tzlich gibt es unterhalb des Zahlungsplans den Abschnitt **"Dringlichkeit im Vergleich"**:
+eine reine Einsch&auml;tzung, welche Schulden bei Nichtzahlung am ehesten eskalieren (z.B. AHV/
+Ausgleichskasse und Krankenkasse betreiben typischerweise schnell, Miete kann zur K&uuml;ndigung
+f&uuml;hren). Das ist nur Orientierung, keine Rechtsberatung, und &auml;ndert nichts an der
+Zahlung selbst &mdash; alle Schulden werden weiterhin gleich bedient. Die Liste der Gl&auml;ubiger-
+Typen und ihre Dringlichkeit stehen in `js/creditorTypes.js`.
+
 Die Regionsauswahl (Land + Kanton/Bundesland) ist schon f&uuml;r alle Kantone der Schweiz sowie
 alle Bundesl&auml;nder Deutschlands und &Ouml;sterreichs vorbereitet ("Bald verf&uuml;gbar"), damit sich
 neue Regionen sp&auml;ter einfach erg&auml;nzen lassen, ohne die Oberfl&auml;che neu bauen zu m&uuml;ssen.

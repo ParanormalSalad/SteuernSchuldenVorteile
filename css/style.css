@@ -303,6 +303,33 @@ canvas#balance-chart {
   margin: 0.15rem 0 0.6rem;
 }
 
+.urgency-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
+.urgency-item {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+.urgency-item-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; font-weight: 600; }
+.urgency-item .urgency-reason { margin-bottom: 0; }
+.urgency-badge {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.urgency-badge.urgency-5 { background: #fbe1e1; color: #9a2a2a; }
+.urgency-badge.urgency-4 { background: var(--color-warning-bg); color: #8a5a10; }
+.urgency-badge.urgency-2 { background: #e4ecf7; color: #2f5590; }
+.urgency-badge.urgency-1 { background: var(--color-border); color: var(--color-muted); }
+@media (prefers-color-scheme: dark) {
+  .urgency-badge.urgency-5 { background: #4a2323; color: #f3a9a9; }
+  .urgency-badge.urgency-4 { background: #3a2f1c; color: #e0b466; }
+  .urgency-badge.urgency-2 { background: #22334a; color: #9db8e0; }
+}
+
 .site-footer {
   text-align: center;
   color: var(--color-muted);
