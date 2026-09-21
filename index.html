@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finanzassistent &ndash; Schulden, Steuern &amp; Finanzhilfen</title>
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
 
@@ -18,6 +18,27 @@
   Steuererkl&auml;rung, keine Rechtsberatung und keine offizielle Schuldenberatung. Bitte pr&uuml;fe alle Ergebnisse und wende dich
   bei wichtigen Entscheidungen an eine offizielle Beratungsstelle (siehe Abschnitt &laquo;Hilfe in deiner Region&raquo; unten).
   Alle Eingaben bleiben ausschliesslich in diesem Browser gespeichert &mdash; es werden keine Daten an einen Server &uuml;bertragen.
+</div>
+
+<section id="profile-picker" class="card profile-picker">
+  <h2>Wer bist du?</h2>
+  <p>Jede Person bekommt ein eigenes, leeres Profil &mdash; niemand sieht die Zahlen einer anderen Person. W&auml;hle dein
+     bestehendes Profil oder leg ein neues an.</p>
+  <div id="profile-list" class="profile-list"></div>
+  <div class="profile-new">
+    <input type="text" id="new-profile-name" placeholder="Dein Name">
+    <button id="create-profile-btn" type="button" class="primary-btn">Neues Profil anlegen</button>
+  </div>
+  <p class="strategy-note">Hinweis: Das ist kein Passwortschutz. Es trennt nur die Ansicht, damit sich Personen, die denselben
+     Browser nutzen, nicht gegenseitig ihre Zahlen sehen &mdash; wer Zugriff auf dieses Ger&auml;t hat, kann grunds&auml;tzlich
+     jedes Profil ausw&auml;hlen.</p>
+</section>
+
+<div id="app-content" hidden>
+
+<div class="profile-bar">
+  <span>Profil: <strong id="current-profile-name"></strong></span>
+  <button id="switch-profile-btn" type="button" class="secondary-btn">Profil wechseln</button>
 </div>
 
 <nav class="tabs" id="tabs">
@@ -114,13 +135,16 @@
   <p>Keine offizielle Steuer- oder Rechtsberatung. Alle Berechnungen erfolgen lokal in deinem Browser.</p>
 </footer>
 
+</div>
+
 <!-- ?v=N is a cache-buster: bump it whenever any js/*.js or css file changes,
      so returning visitors get the new version without needing a hard refresh. -->
-<script src="js/regions.js?v=10"></script>
-<script src="js/creditorTypes.js?v=10"></script>
-<script src="js/storage.js?v=10"></script>
-<script src="js/debtPlanner.js?v=10"></script>
-<script src="js/chart.js?v=10"></script>
-<script src="js/app.js?v=10"></script>
+<script src="js/regions.js?v=11"></script>
+<script src="js/creditorTypes.js?v=11"></script>
+<script src="js/storage.js?v=11"></script>
+<script src="js/profiles.js?v=11"></script>
+<script src="js/debtPlanner.js?v=11"></script>
+<script src="js/chart.js?v=11"></script>
+<script src="js/app.js?v=11"></script>
 </body>
 </html>

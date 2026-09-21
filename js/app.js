@@ -1,8 +1,12 @@
 (function () {
-  let debts = Storage.loadDebts();
-  let income = Storage.loadIncome();
-  let fixedCosts = Storage.loadFixedCosts();
-  const settings = Object.assign({ country: "CH", subdivision: "SG" }, Storage.loadSettings());
+  // populated by startApp() once a profile is chosen -- nothing below
+  // this point touches Storage before that happens
+  let debts, income, fixedCosts, settings, nextDebtId, nextIncomeId, nextFixedCostId;
+
+  // tracks the value we last set extra-payment to automatically, so we can
+  // tell "still following the computed maximum" apart from "user typed
+  // their own amount" without a separate flag
+  let lastAutoExtra = null;
 
   const countrySelect = document.getElementById("country-select");
   const subdivisionSelect = document.getElementById("subdivision-select");
@@ -17,14 +21,17 @@
   const extraPaymentSuggestion = document.getElementById("extra-payment-suggestion");
   const resultsEl = document.getElementById("results");
 
-  let nextDebtId = debts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
-  let nextIncomeId = income.reduce((max, d) => Math.max(max, d.id), 0) + 1;
-  let nextFixedCostId = fixedCosts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
-
-  // tracks the value we last set extra-payment to automatically, so we can
-  // tell "still following the computed maximum" apart from "user typed
-  // their own amount" without a separate flag
-  let lastAutoExtra = null;
+  function startApp(profileId) {
+    Storage.setProfile(profileId);
+    debts = Storage.loadDebts();
+    income = Storage.loadIncome();
+    fixedCosts = Storage.loadFixedCosts();
+    settings = Object.assign({ country: "CH", subdivision: "SG" }, Storage.loadSettings());
+    nextDebtId = debts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+    nextIncomeId = income.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+    nextFixedCostId = fixedCosts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+    init();
+  }
 
   function init() {
     Object.keys(REGIONS).forEach((code) => {
@@ -523,5 +530,105 @@
     return "CHF " + Math.round(v).toLocaleString("de-CH");
   }
 
-  init();
+  // ---- Profile picker (gates everything above) ----
+
+  const LAST_PROFILE_KEY = "ssv_last_profile_id";
+  const profilePickerEl = document.getElementById("profile-picker");
+  const profileListEl = document.getElementById("profile-list");
+  const newProfileNameInput = document.getElementById("new-profile-name");
+  const appContentEl = document.getElementById("app-content");
+  const currentProfileNameEl = document.getElementById("current-profile-name");
+
+  function getLastProfileId() {
+    try {
+      return localStorage.getItem(LAST_PROFILE_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setLastProfileId(id) {
+    try {
+      localStorage.setItem(LAST_PROFILE_KEY, id || "");
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function renderProfilePicker() {
+    const profiles = Profiles.list();
+    profileListEl.innerHTML = "";
+    if (profiles.length === 0) {
+      const p = document.createElement("p");
+      p.className = "empty-state";
+      p.textContent = "Noch keine Profile vorhanden. Leg unten das erste an.";
+      profileListEl.appendChild(p);
+      return;
+    }
+    profiles.forEach((profile) => {
+      const row = document.createElement("div");
+      row.className = "profile-row";
+
+      const selectBtn = document.createElement("button");
+      selectBtn.type = "button";
+      selectBtn.className = "profile-select-btn";
+      selectBtn.textContent = profile.name;
+      selectBtn.addEventListener("click", () => selectProfile(profile.id));
+      row.appendChild(selectBtn);
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "remove-row-btn";
+      delBtn.title = "Profil und alle Daten löschen";
+      delBtn.textContent = "✕";
+      delBtn.addEventListener("click", () => {
+        if (confirm(`Profil «${profile.name}» und alle gespeicherten Daten unwiderruflich löschen?`)) {
+          Profiles.remove(profile.id);
+          if (getLastProfileId() === profile.id) setLastProfileId("");
+          renderProfilePicker();
+        }
+      });
+      row.appendChild(delBtn);
+
+      profileListEl.appendChild(row);
+    });
+  }
+
+  function selectProfile(id) {
+    const profile = Profiles.list().find((p) => p.id === id);
+    if (!profile) return;
+    setLastProfileId(id);
+    profilePickerEl.hidden = true;
+    appContentEl.hidden = false;
+    currentProfileNameEl.textContent = profile.name;
+    startApp(id);
+  }
+
+  document.getElementById("create-profile-btn").addEventListener("click", () => {
+    const name = newProfileNameInput.value.trim();
+    if (!name) {
+      newProfileNameInput.focus();
+      return;
+    }
+    const profile = Profiles.create(name);
+    newProfileNameInput.value = "";
+    selectProfile(profile.id);
+  });
+  newProfileNameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("create-profile-btn").click();
+  });
+
+  document.getElementById("switch-profile-btn").addEventListener("click", () => {
+    // a fresh reload guarantees no leftover event listeners / in-memory
+    // state from the previous profile leak into the next one
+    setLastProfileId("");
+    location.reload();
+  });
+
+  renderProfilePicker();
+  const lastProfileId = getLastProfileId();
+  const lastProfile = Profiles.list().find((p) => p.id === lastProfileId);
+  if (lastProfile) {
+    selectProfile(lastProfile.id);
+  }
 })();

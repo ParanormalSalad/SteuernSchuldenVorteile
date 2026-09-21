@@ -12,6 +12,13 @@ kontaktieren (siehe Abschnitt "Hilfe in deiner Region" in der App).
 Betr&auml;ge usw.) werden nur im Browser der Person gespeichert, die die Seite ge&ouml;ffnet hat
 (`localStorage`). Es wird nichts irgendwohin verschickt.
 
+**Mehrere Personen auf demselben Ger&auml;t:** Beim ersten &Ouml;ffnen fragt die App "Wer bist
+du?" und legt pro Name ein eigenes, komplett getrenntes Profil an &mdash; jede Person sieht nur
+ihre eigenen Zahlen, neue Profile starten leer. Das ist kein Passwortschutz (keine echte
+Sicherheit vor jemandem, der Zugriff auf das Ger&auml;t hat), sondern trennt nur die Ansicht, damit
+sich Familienmitglieder nicht gegenseitig aus Versehen ihre Zahlen zeigen. Mit "Profil wechseln"
+oben in der App kann man jederzeit wechseln oder ein Profil (inkl. aller Daten) l&ouml;schen.
+
 ## Aktueller Stand
 
 | Modul | Status |
@@ -83,7 +90,8 @@ index.html            Seitenstruktur (HTML)
 css/style.css          Aussehen (hell/dunkel, mobilfreundlich)
 js/regions.js          Alle L&auml;nder/Kantone/Bundesl&auml;nder + regionale Infos (St. Gallen ausgef&uuml;llt)
 js/creditorTypes.js    Gl&auml;ubiger-Typen zur Kategorisierung (Vermieter, Krankenkasse, AHV/IV, ...)
-js/storage.js          Speichern/Laden im Browser (localStorage)
+js/profiles.js         Liste der lokalen Profile (nur Name + ID, keine Finanzdaten)
+js/storage.js          Speichern/Laden im Browser (localStorage), pro Profil getrennt
 js/debtPlanner.js      Die eigentliche Berechnung des Abzahlungsplans
 js/chart.js            Einfaches Diagramm (Restschuld &uuml;ber Zeit), ohne externe Bibliothek
 js/app.js              Verbindet alles: F&uuml;llt die Seite, reagiert auf Klicks/Eingaben
