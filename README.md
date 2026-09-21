@@ -32,6 +32,12 @@ Die Regionsauswahl (Land + Kanton/Bundesland) ist schon f&uuml;r alle Kantone de
 alle Bundesl&auml;nder Deutschlands und &Ouml;sterreichs vorbereitet ("Bald verf&uuml;gbar"), damit sich
 neue Regionen sp&auml;ter einfach erg&auml;nzen lassen, ohne die Oberfl&auml;che neu bauen zu m&uuml;ssen.
 
+**Nach einem Update nichts Neues sichtbar?** In `index.html` h&auml;ngt an jeder CSS-/JS-Datei ein
+`?v=5`. Diese Zahl wird bei jeder inhaltlichen &Auml;nderung erh&ouml;ht, damit Browser die neue Version
+laden statt eine alte, zwischengespeicherte. Falls trotzdem noch die alte Version angezeigt wird:
+einmal hart neu laden (`Strg+Umschalt+R` bzw. `Cmd+Umschalt+R`) oder den Tab schliessen und den
+Link neu &ouml;ffnen.
+
 ## Wie du es &ouml;ffnest (keine Installation n&ouml;tig)
 
 **Am einfachsten:** Datei `index.html` im Ordner doppelklicken &mdash; sie &ouml;ffnet sich im

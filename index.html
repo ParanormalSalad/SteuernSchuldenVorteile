@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finanzassistent &ndash; Schulden, Steuern &amp; Finanzhilfen</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 
@@ -129,11 +129,13 @@
   <p>Keine offizielle Steuer- oder Rechtsberatung. Alle Berechnungen erfolgen lokal in deinem Browser.</p>
 </footer>
 
-<script src="js/regions.js"></script>
-<script src="js/creditorTypes.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/debtPlanner.js"></script>
-<script src="js/chart.js"></script>
-<script src="js/app.js"></script>
+<!-- ?v=N is a cache-buster: bump it whenever any js/*.js or css file changes,
+     so returning visitors get the new version without needing a hard refresh. -->
+<script src="js/regions.js?v=5"></script>
+<script src="js/creditorTypes.js?v=5"></script>
+<script src="js/storage.js?v=5"></script>
+<script src="js/debtPlanner.js?v=5"></script>
+<script src="js/chart.js?v=5"></script>
+<script src="js/app.js?v=5"></script>
 </body>
 </html>
