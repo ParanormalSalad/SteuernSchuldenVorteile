@@ -16,17 +16,19 @@ Betr&auml;ge usw.) werden nur im Browser der Person gespeichert, die die Seite g
 
 | Modul | Status |
 |---|---|
-| Einkommen & Fixkosten (errechnet, was monatlich f&uuml;r Schulden &uuml;brig bleibt) | ✅ funktioniert |
-| Schuldenplaner (Lawine/Schneeball/Dringlichkeit-Abzahlungsplan) | ✅ funktioniert, regionsunabh&auml;ngig |
+| Einkommen & Fixkosten (errechnet, was monatlich f&uuml;r Schulden &uuml;brig bleibt, live) | ✅ funktioniert |
+| Schuldenplaner (alle Schulden gleichzeitig, Extra-Betrag gleichm&auml;ssig aufgeteilt) | ✅ funktioniert, regionsunabh&auml;ngig |
 | Finanzhilfen-Finder (z.B. Erg&auml;nzungsleistungen, Pr&auml;mienverbilligung) | 🔜 als N&auml;chstes geplant |
 | Steuer-Helfer (Sch&auml;tzung/Checkliste f&uuml;r die Steuererkl&auml;rung) | 🔜 sp&auml;ter geplant |
 | Regionen mit echten Daten hinterlegt | Kanton St. Gallen (Schweiz) |
 
-Die dritte Strategie **"Dringlichkeit"** sortiert Schulden nicht nach Zinssatz oder Betrag,
-sondern danach, wie ernst die Konsequenzen bei Nichtzahlung sind (z.B. AHV/Ausgleichskasse,
-Krankenkasse und Vermieter betreiben typischerweise schnell und konsequent). Das ist eine
-allgemeine Einsch&auml;tzung, keine Rechtsberatung &mdash; die Liste der Gl&auml;ubiger-Typen und ihre
-Dringlichkeit stehen in `js/creditorTypes.js`.
+Der Schuldenplaner zahlt bewusst **alle offenen Schulden gleichzeitig** ab, statt eine nach der
+anderen: jede bekommt ihre Mindestzahlung, und der monatliche Zusatzbetrag (automatisch berechnet
+aus Einkommen minus Fixkosten minus Mindestzahlungen) wird gleich auf alle aufgeteilt. Frei
+gewordene Mindestzahlungen (sobald eine Schuld fertig ist) flie&szlig;en sofort in die restlichen
+Schulden. `js/creditorTypes.js` und `DebtPlanner.simulate()` unterst&uuml;tzen technisch noch
+weitere Strategien (z.B. nach Zinssatz oder Dringlichkeit), diese sind aber aktuell nicht in der
+Oberfl&auml;che ausw&auml;hlbar.
 
 Die Regionsauswahl (Land + Kanton/Bundesland) ist schon f&uuml;r alle Kantone der Schweiz sowie
 alle Bundesl&auml;nder Deutschlands und &Ouml;sterreichs vorbereitet ("Bald verf&uuml;gbar"), damit sich

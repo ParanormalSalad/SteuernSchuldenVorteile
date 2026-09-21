@@ -1,4 +1,9 @@
 (function () {
+  // only one payoff strategy is offered: split the extra amount evenly
+  // across every open debt so none of them sit untouched while another
+  // one gets paid off first
+  const STRATEGY = "equal";
+
   let debts = Storage.loadDebts();
   let income = Storage.loadIncome();
   let fixedCosts = Storage.loadFixedCosts();
@@ -61,17 +66,6 @@
       settings.extraPayment = extraPaymentInput.value;
       Storage.saveSettings(settings);
       calculate();
-    });
-    if (settings.strategy) {
-      const radio = document.querySelector(`input[name="strategy"][value="${settings.strategy}"]`);
-      if (radio) radio.checked = true;
-    }
-    document.querySelectorAll('input[name="strategy"]').forEach((r) => {
-      r.addEventListener("change", () => {
-        settings.strategy = document.querySelector('input[name="strategy"]:checked').value;
-        Storage.saveSettings(settings);
-        calculate();
-      });
     });
 
     // start every list with one blank, ready-to-type row instead of an
@@ -411,8 +405,7 @@
     }
 
     const extra = Number(extraPaymentInput.value) || 0;
-    const strategy = document.querySelector('input[name="strategy"]:checked').value;
-    const result = DebtPlanner.simulate(validDebts, extra, strategy);
+    const result = DebtPlanner.simulate(validDebts, extra, STRATEGY);
 
     if (!result.feasible) {
       const warn = document.createElement("div");
@@ -441,10 +434,10 @@
     const planTitle = document.createElement("h3");
     planTitle.textContent = "Zahlungsplan: wie viel wohin, pro Monat";
     resultsEl.appendChild(planTitle);
-    renderPaymentPlan(DebtPlanner.derivePaymentPlan(result.order, extra, strategy));
+    renderPaymentPlan(DebtPlanner.derivePaymentPlan(result.order, extra, STRATEGY));
 
     const orderTitle = document.createElement("h3");
-    orderTitle.textContent = strategy === "equal" ? "Ergebnis pro Schuld" : "Abzahlungsreihenfolge";
+    orderTitle.textContent = "Ergebnis pro Schuld";
     resultsEl.appendChild(orderTitle);
 
     const list = document.createElement("ol");
@@ -454,16 +447,6 @@
       const li = document.createElement("li");
       li.textContent = `${entry.name} – schuldenfrei nach ${entry.payoffMonth} Monaten (Zinsen: ${formatChf(entry.interestPaid)})`;
       list.appendChild(li);
-
-      if (strategy === "urgency") {
-        const type = CREDITOR_TYPE_BY_ID[entry.creditorType];
-        if (type) {
-          const reason = document.createElement("p");
-          reason.className = "urgency-reason";
-          reason.textContent = `${type.label}: ${type.reason}`;
-          li.appendChild(reason);
-        }
-      }
     });
     resultsEl.appendChild(list);
   }

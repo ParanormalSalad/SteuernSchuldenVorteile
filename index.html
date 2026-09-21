@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finanzassistent &ndash; Schulden, Steuern &amp; Finanzhilfen</title>
-<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 
@@ -71,8 +71,8 @@
 
   <section id="debt-planner" class="tab-panel card active">
     <h2>Schuldenplaner</h2>
-    <p>Erfasse alle Schulden mit Betrag, Zinssatz und monatlicher Mindestzahlung. Der Planer berechnet, in welcher Reihenfolge
-       du sie am g&uuml;nstigsten &ndash; oder am dringendsten &ndash; abbezahlst.</p>
+    <p>Erfasse alle Schulden mit Betrag, Zinssatz und monatlicher Mindestzahlung. Der Planer zahlt sie gleichzeitig ab und
+       zeigt, wie viel monatlich an wen geht, bis alle schuldenfrei sind.</p>
 
     <table id="debt-table" class="entry-table debt-table">
       <thead>
@@ -95,26 +95,7 @@
         <input type="number" id="extra-payment" min="0" step="10" value="0">
       </label>
       <p id="extra-payment-suggestion" class="suggestion-note"></p>
-
-      <fieldset class="strategy-fieldset">
-        <legend>Strategie</legend>
-        <label class="radio-label">
-          <input type="radio" name="strategy" value="avalanche" checked>
-          Lawine &mdash; zuerst die Schuld mit dem h&ouml;chsten Zinssatz (spart am meisten Geld)
-        </label>
-        <label class="radio-label">
-          <input type="radio" name="strategy" value="snowball">
-          Schneeball &mdash; zuerst die kleinste Schuld (schnellere Erfolgserlebnisse)
-        </label>
-        <label class="radio-label">
-          <input type="radio" name="strategy" value="urgency">
-          Dringlichkeit &mdash; zuerst die Schuld mit den ernstesten Konsequenzen (z.B. AHV oder Miete, die schnell betreiben)
-        </label>
-        <label class="radio-label">
-          <input type="radio" name="strategy" value="equal">
-          Gleichm&auml;ssig &mdash; der Zusatzbetrag wird auf alle offenen Schulden gleich aufgeteilt, alle werden parallel abbezahlt (insgesamt meist etwas mehr Zinsen als bei Lawine/Schneeball)
-        </label>
-      </fieldset>
+      <p class="strategy-note">Alle offenen Schulden werden gleichzeitig bedient: jede bekommt ihre Mindestzahlung, und der Zusatzbetrag wird gleich auf alle aufgeteilt &mdash; niemand wartet, bis eine andere Schuld fertig ist.</p>
     </div>
 
     <button id="calculate-btn" type="button" class="primary-btn">Plan berechnen</button>
@@ -135,11 +116,11 @@
 
 <!-- ?v=N is a cache-buster: bump it whenever any js/*.js or css file changes,
      so returning visitors get the new version without needing a hard refresh. -->
-<script src="js/regions.js?v=7"></script>
-<script src="js/creditorTypes.js?v=7"></script>
-<script src="js/storage.js?v=7"></script>
-<script src="js/debtPlanner.js?v=7"></script>
-<script src="js/chart.js?v=7"></script>
-<script src="js/app.js?v=7"></script>
+<script src="js/regions.js?v=8"></script>
+<script src="js/creditorTypes.js?v=8"></script>
+<script src="js/storage.js?v=8"></script>
+<script src="js/debtPlanner.js?v=8"></script>
+<script src="js/chart.js?v=8"></script>
+<script src="js/app.js?v=8"></script>
 </body>
 </html>
