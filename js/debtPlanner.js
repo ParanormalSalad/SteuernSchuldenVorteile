@@ -1,11 +1,13 @@
 /*
- * Debt payoff simulation: avalanche (highest interest first) or
- * snowball (smallest balance first). Every month, interest accrues on
- * every debt, minimum payments are made on every debt, and any leftover
- * "extra" budget is funnelled into the current target debt. Once a debt
- * hits zero, its minimum payment is freed up and joins the extra pool for
- * the next debt in line -- that roll-over is what makes both strategies
- * pay off debt faster than paying minimums alone.
+ * Debt payoff simulation: avalanche (highest interest first), snowball
+ * (smallest balance first), or urgency (real-world consequences first,
+ * e.g. rent/Krankenkasse/AHV, see creditorTypes.js). Every month,
+ * interest accrues on every debt, minimum payments are made on every
+ * debt, and any leftover "extra" budget is funnelled into the current
+ * target debt. Once a debt hits zero, its minimum payment is freed up
+ * and joins the extra pool for the next debt in line -- that roll-over
+ * is what makes all three strategies pay off debt faster than paying
+ * minimums alone.
  */
 const DebtPlanner = {
   MAX_MONTHS: 600, // 50 years safety cap so a bad input can't loop forever
@@ -16,7 +18,8 @@ const DebtPlanner = {
       name: d.name,
       balance: Number(d.balance) || 0,
       apr: Number(d.apr) || 0,
-      minPayment: Number(d.minPayment) || 0
+      minPayment: Number(d.minPayment) || 0,
+      creditorType: d.creditorType || DEFAULT_CREDITOR_TYPE
     }));
 
     if (debts.length === 0) {
@@ -87,6 +90,7 @@ const DebtPlanner = {
         return {
           id,
           name: original.name,
+          creditorType: original.creditorType || DEFAULT_CREDITOR_TYPE,
           payoffMonth: payoffMonth[id],
           interestPaid: interestPaid[id]
         };
@@ -98,9 +102,16 @@ const DebtPlanner = {
     const copy = [...debts];
     if (strategy === "snowball") {
       copy.sort((a, b) => a.balance - b.balance);
+    } else if (strategy === "urgency") {
+      copy.sort((a, b) => this._urgencyOf(b) - this._urgencyOf(a) || b.apr - a.apr);
     } else {
       copy.sort((a, b) => b.apr - a.apr);
     }
     return copy.map((d) => d.id);
+  },
+
+  _urgencyOf(debt) {
+    const type = CREDITOR_TYPE_BY_ID[debt.creditorType];
+    return type ? type.urgency : CREDITOR_TYPE_BY_ID[DEFAULT_CREDITOR_TYPE].urgency;
   }
 };

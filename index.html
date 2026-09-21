@@ -43,15 +43,42 @@
     <p id="region-status" class="region-status"></p>
   </section>
 
+  <section id="budget" class="card">
+    <h2>Einkommen &amp; Fixkosten</h2>
+    <p>Erfasse dein monatliches Einkommen und deine fixen monatlichen Ausgaben (Miete, Krankenkasse, Strom usw.). Daraus
+       errechnet sich, wie viel Geld monatlich f&uuml;r Schulden &uuml;brig bleibt.</p>
+
+    <h3>Einkommen</h3>
+    <table id="income-table" class="entry-table">
+      <thead>
+        <tr><th>Quelle</th><th>Betrag / Monat (CHF)</th><th></th></tr>
+      </thead>
+      <tbody id="income-table-body"></tbody>
+    </table>
+    <button id="add-income-btn" type="button" class="secondary-btn">+ Einkommen hinzuf&uuml;gen</button>
+
+    <h3>Fixkosten</h3>
+    <table id="fixed-costs-table" class="entry-table">
+      <thead>
+        <tr><th>Bezeichnung</th><th>Betrag / Monat (CHF)</th><th></th></tr>
+      </thead>
+      <tbody id="fixed-costs-table-body"></tbody>
+    </table>
+    <button id="add-fixed-cost-btn" type="button" class="secondary-btn">+ Fixkosten hinzuf&uuml;gen</button>
+
+    <div id="budget-summary" class="budget-summary"></div>
+  </section>
+
   <section id="debt-planner" class="tab-panel card active">
     <h2>Schuldenplaner</h2>
     <p>Erfasse alle Schulden mit Betrag, Zinssatz und monatlicher Mindestzahlung. Der Planer berechnet, in welcher Reihenfolge
-       du sie am g&uuml;nstigsten abbezahlst.</p>
+       du sie am g&uuml;nstigsten &ndash; oder am dringendsten &ndash; abbezahlst.</p>
 
-    <table id="debt-table" class="debt-table">
+    <table id="debt-table" class="entry-table debt-table">
       <thead>
         <tr>
           <th>Bezeichnung</th>
+          <th>Gl&auml;ubiger-Typ</th>
           <th>Restschuld (CHF)</th>
           <th>Zinssatz (% pro Jahr)</th>
           <th>Mindestzahlung / Monat (CHF)</th>
@@ -67,6 +94,7 @@
         Zus&auml;tzlicher Betrag pro Monat, der f&uuml;r Schulden zur Verf&uuml;gung steht (CHF)
         <input type="number" id="extra-payment" min="0" step="10" value="0">
       </label>
+      <p id="extra-payment-suggestion" class="suggestion-note"></p>
 
       <fieldset class="strategy-fieldset">
         <legend>Strategie</legend>
@@ -77,6 +105,10 @@
         <label class="radio-label">
           <input type="radio" name="strategy" value="snowball">
           Schneeball &mdash; zuerst die kleinste Schuld (schnellere Erfolgserlebnisse)
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="strategy" value="urgency">
+          Dringlichkeit &mdash; zuerst die Schuld mit den ernstesten Konsequenzen (z.B. AHV oder Miete, die schnell betreiben)
         </label>
       </fieldset>
     </div>
@@ -98,6 +130,7 @@
 </footer>
 
 <script src="js/regions.js"></script>
+<script src="js/creditorTypes.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/debtPlanner.js"></script>
 <script src="js/chart.js"></script>

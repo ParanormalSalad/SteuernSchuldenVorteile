@@ -121,12 +121,12 @@ select, input[type="text"], input[type="number"] {
 }
 .region-status { margin: 0.75rem 0 0; font-size: 0.9rem; color: var(--color-muted); }
 
-.debt-table {
+.entry-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 0.75rem;
 }
-.debt-table th {
+.entry-table th {
   text-align: left;
   font-size: 0.82rem;
   color: var(--color-muted);
@@ -134,11 +134,11 @@ select, input[type="text"], input[type="number"] {
   padding: 0.4rem 0.4rem;
   border-bottom: 1px solid var(--color-border);
 }
-.debt-table td {
+.entry-table td {
   padding: 0.35rem 0.4rem;
   border-bottom: 1px solid var(--color-border);
 }
-.debt-table input { width: 100%; }
+.entry-table input, .entry-table select { width: 100%; }
 .remove-row-btn {
   background: none;
   border: none;
@@ -233,6 +233,51 @@ canvas#balance-chart {
 .resource-item p { margin: 0.15rem 0; font-size: 0.92rem; color: var(--color-muted); }
 .resource-item a { color: var(--color-primary-dark); }
 
+.budget-summary {
+  margin-top: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 10px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+.budget-summary .budget-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.92rem;
+  padding: 0.15rem 0;
+}
+.budget-summary .budget-line.total {
+  border-top: 1px solid var(--color-border);
+  margin-top: 0.4rem;
+  padding-top: 0.5rem;
+  font-weight: 700;
+}
+.budget-summary .budget-line.negative { color: var(--color-accent); }
+.budget-summary button {
+  margin-top: 0.75rem;
+}
+
+.suggestion-note {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin: 0.3rem 0 0;
+}
+.suggestion-note button {
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  color: var(--color-primary-dark);
+  cursor: pointer;
+}
+
+.urgency-reason {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin: 0.15rem 0 0.6rem;
+}
+
 .site-footer {
   text-align: center;
   color: var(--color-muted);
@@ -242,5 +287,6 @@ canvas#balance-chart {
 
 @media (max-width: 480px) {
   :root { font-size: 16px; }
-  .debt-table th:nth-child(3), .debt-table td:nth-child(3) { display: none; }
+  .debt-table th:nth-child(2), .debt-table td:nth-child(2),
+  .debt-table th:nth-child(4), .debt-table td:nth-child(4) { display: none; }
 }

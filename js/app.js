@@ -1,5 +1,7 @@
 (function () {
   let debts = Storage.loadDebts();
+  let income = Storage.loadIncome();
+  let fixedCosts = Storage.loadFixedCosts();
   const settings = Object.assign({ country: "CH", subdivision: "SG" }, Storage.loadSettings());
 
   const countrySelect = document.getElementById("country-select");
@@ -8,10 +10,16 @@
   const regionStatus = document.getElementById("region-status");
   const resourcesContent = document.getElementById("resources-content");
   const debtTableBody = document.getElementById("debt-table-body");
+  const incomeTableBody = document.getElementById("income-table-body");
+  const fixedCostsTableBody = document.getElementById("fixed-costs-table-body");
+  const budgetSummaryEl = document.getElementById("budget-summary");
   const extraPaymentInput = document.getElementById("extra-payment");
+  const extraPaymentSuggestion = document.getElementById("extra-payment-suggestion");
   const resultsEl = document.getElementById("results");
 
   let nextDebtId = debts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+  let nextIncomeId = income.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+  let nextFixedCostId = fixedCosts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
 
   function init() {
     Object.keys(REGIONS).forEach((code) => {
@@ -37,6 +45,8 @@
     });
 
     document.getElementById("add-debt-btn").addEventListener("click", addDebtRow);
+    document.getElementById("add-income-btn").addEventListener("click", addIncomeRow);
+    document.getElementById("add-fixed-cost-btn").addEventListener("click", addFixedCostRow);
     document.getElementById("calculate-btn").addEventListener("click", calculate);
 
     if (extraPaymentInput.value === "0" && settings.extraPayment) {
@@ -58,6 +68,9 @@
     });
 
     renderDebtTable();
+    renderIncomeTable();
+    renderFixedCostsTable();
+    renderBudgetSummary();
     renderResources();
   }
 
@@ -123,8 +136,10 @@
     return p;
   }
 
+  // ---- Debts ----
+
   function addDebtRow() {
-    debts.push({ id: nextDebtId++, name: "", balance: "", apr: "", minPayment: "" });
+    debts.push({ id: nextDebtId++, name: "", balance: "", apr: "", minPayment: "", creditorType: DEFAULT_CREDITOR_TYPE });
     persistDebts();
     renderDebtTable();
   }
@@ -137,6 +152,7 @@
 
   function persistDebts() {
     Storage.saveDebts(debts);
+    renderBudgetSummary();
   }
 
   function renderDebtTable() {
@@ -144,7 +160,7 @@
     if (debts.length === 0) {
       const tr = document.createElement("tr");
       const td = document.createElement("td");
-      td.colSpan = 5;
+      td.colSpan = 6;
       td.className = "empty-state";
       td.textContent = "Noch keine Schulden erfasst. Füge unten die erste Schuld hinzu.";
       tr.appendChild(td);
@@ -154,26 +170,101 @@
 
     debts.forEach((debt) => {
       const tr = document.createElement("tr");
-      tr.appendChild(makeInputCell(debt, "name", "text", "z.B. Kreditkarte"));
-      tr.appendChild(makeInputCell(debt, "balance", "number", "0"));
-      tr.appendChild(makeInputCell(debt, "apr", "number", "0"));
-      tr.appendChild(makeInputCell(debt, "minPayment", "number", "0"));
-
-      const actionTd = document.createElement("td");
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "remove-row-btn";
-      btn.textContent = "✕";
-      btn.title = "Entfernen";
-      btn.addEventListener("click", () => removeDebtRow(debt.id));
-      actionTd.appendChild(btn);
-      tr.appendChild(actionTd);
-
+      tr.appendChild(makeInputCell(debt, "name", "text", "z.B. Kreditkarte", persistDebts));
+      tr.appendChild(makeCreditorTypeCell(debt));
+      tr.appendChild(makeInputCell(debt, "balance", "number", "0", persistDebts));
+      tr.appendChild(makeInputCell(debt, "apr", "number", "0", persistDebts));
+      tr.appendChild(makeInputCell(debt, "minPayment", "number", "0", persistDebts));
+      tr.appendChild(makeRemoveCell(() => removeDebtRow(debt.id)));
       debtTableBody.appendChild(tr);
     });
   }
 
-  function makeInputCell(debt, field, type, placeholder) {
+  function makeCreditorTypeCell(debt) {
+    const td = document.createElement("td");
+    const select = document.createElement("select");
+    CREDITOR_TYPES.forEach((type) => {
+      const opt = document.createElement("option");
+      opt.value = type.id;
+      opt.textContent = type.label;
+      select.appendChild(opt);
+    });
+    select.value = debt.creditorType || DEFAULT_CREDITOR_TYPE;
+    select.addEventListener("change", () => {
+      debt.creditorType = select.value;
+      persistDebts();
+    });
+    td.appendChild(select);
+    return td;
+  }
+
+  // ---- Income & fixed costs (share the same {id, name, amount} shape) ----
+
+  function addIncomeRow() {
+    income.push({ id: nextIncomeId++, name: "", amount: "" });
+    persistIncome();
+    renderIncomeTable();
+  }
+
+  function removeIncomeRow(id) {
+    income = income.filter((d) => d.id !== id);
+    persistIncome();
+    renderIncomeTable();
+  }
+
+  function persistIncome() {
+    Storage.saveIncome(income);
+    renderBudgetSummary();
+  }
+
+  function renderIncomeTable() {
+    renderAmountTable(incomeTableBody, income, "Noch kein Einkommen erfasst.", "z.B. Lohn, AHV-Rente", persistIncome, removeIncomeRow);
+  }
+
+  function addFixedCostRow() {
+    fixedCosts.push({ id: nextFixedCostId++, name: "", amount: "" });
+    persistFixedCosts();
+    renderFixedCostsTable();
+  }
+
+  function removeFixedCostRow(id) {
+    fixedCosts = fixedCosts.filter((d) => d.id !== id);
+    persistFixedCosts();
+    renderFixedCostsTable();
+  }
+
+  function persistFixedCosts() {
+    Storage.saveFixedCosts(fixedCosts);
+    renderBudgetSummary();
+  }
+
+  function renderFixedCostsTable() {
+    renderAmountTable(fixedCostsTableBody, fixedCosts, "Noch keine Fixkosten erfasst.", "z.B. Miete, Krankenkasse, Strom", persistFixedCosts, removeFixedCostRow);
+  }
+
+  function renderAmountTable(tbody, items, emptyText, placeholder, onChange, onRemove) {
+    tbody.innerHTML = "";
+    if (items.length === 0) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 3;
+      td.className = "empty-state";
+      td.textContent = emptyText;
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    items.forEach((item) => {
+      const tr = document.createElement("tr");
+      tr.appendChild(makeInputCell(item, "name", "text", placeholder, onChange));
+      tr.appendChild(makeInputCell(item, "amount", "number", "0", onChange));
+      tr.appendChild(makeRemoveCell(() => onRemove(item.id)));
+      tbody.appendChild(tr);
+    });
+  }
+
+  function makeInputCell(item, field, type, placeholder, onChange) {
     const td = document.createElement("td");
     const input = document.createElement("input");
     input.type = type;
@@ -182,19 +273,89 @@
       input.step = field === "apr" ? "0.1" : "10";
     }
     input.placeholder = placeholder;
-    input.value = debt[field];
+    input.value = item[field];
     input.addEventListener("input", () => {
-      debt[field] = input.value;
-      persistDebts();
+      item[field] = input.value;
+      onChange();
     });
     td.appendChild(input);
     return td;
   }
 
+  function makeRemoveCell(onRemove) {
+    const td = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "remove-row-btn";
+    btn.textContent = "✕";
+    btn.title = "Entfernen";
+    btn.addEventListener("click", onRemove);
+    td.appendChild(btn);
+    return td;
+  }
+
+  // ---- Budget summary ----
+
+  function sumAmounts(items) {
+    return items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  }
+
+  function sumMinPayments() {
+    return debts.reduce((sum, d) => sum + (Number(d.minPayment) || 0), 0);
+  }
+
+  function computeAvailableForDebt() {
+    return sumAmounts(income) - sumAmounts(fixedCosts) - sumMinPayments();
+  }
+
+  function renderBudgetSummary() {
+    const totalIncome = sumAmounts(income);
+    const totalFixedCosts = sumAmounts(fixedCosts);
+    const totalMinPayments = sumMinPayments();
+    const available = computeAvailableForDebt();
+
+    budgetSummaryEl.innerHTML = `
+      <div class="budget-line"><span>Einkommen</span><span>${formatChf(totalIncome)}</span></div>
+      <div class="budget-line"><span>Fixkosten</span><span>&minus; ${formatChf(totalFixedCosts)}</span></div>
+      <div class="budget-line"><span>Mindestzahlungen Schulden</span><span>&minus; ${formatChf(totalMinPayments)}</span></div>
+      <div class="budget-line total ${available < 0 ? "negative" : ""}">
+        <span>${available < 0 ? "Fehlbetrag" : "Verfügbar für zusätzliche Schuldentilgung"}</span>
+        <span>${formatChf(available)}</span>
+      </div>
+      ${available < 0 ? '<p class="urgency-reason">Deine Fixkosten und Mindestzahlungen übersteigen dein Einkommen. Wende dich möglichst bald an eine Schuldenberatung (siehe unten) – ggf. gibt es Anspruch auf staatliche Unterstützung.</p>' : ""}
+    `;
+
+    extraPaymentSuggestion.innerHTML = "";
+    if (income.length > 0 || fixedCosts.length > 0) {
+      const suggested = Math.max(0, Math.round(available));
+      const span = document.createElement("span");
+      span.textContent = `Aus Einkommen und Fixkosten errechnet: ${formatChf(suggested)}. `;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = "Übernehmen";
+      btn.addEventListener("click", () => {
+        extraPaymentInput.value = suggested;
+        settings.extraPayment = String(suggested);
+        Storage.saveSettings(settings);
+      });
+      extraPaymentSuggestion.appendChild(span);
+      extraPaymentSuggestion.appendChild(btn);
+    }
+  }
+
+  // ---- Calculation ----
+
   function calculate() {
     const validDebts = debts
       .filter((d) => d.name && Number(d.balance) > 0)
-      .map((d) => ({ id: d.id, name: d.name, balance: Number(d.balance), apr: Number(d.apr) || 0, minPayment: Number(d.minPayment) || 0 }));
+      .map((d) => ({
+        id: d.id,
+        name: d.name,
+        balance: Number(d.balance),
+        apr: Number(d.apr) || 0,
+        minPayment: Number(d.minPayment) || 0,
+        creditorType: d.creditorType || DEFAULT_CREDITOR_TYPE
+      }));
 
     resultsEl.innerHTML = "";
 
@@ -211,7 +372,7 @@
       const warn = document.createElement("div");
       warn.className = "warning-box";
       warn.textContent =
-        "Mit diesen Angaben ist die Schuld auch nach 50 Jahren nicht abbezahlt – die Zinsen wächst schneller, als bezahlt wird. Erhöhe den monatlichen Zusatzbetrag oder wende dich an eine Schuldenberatung (siehe unten).";
+        "Mit diesen Angaben ist die Schuld auch nach 50 Jahren nicht abbezahlt – die Zinsen wachsen schneller, als bezahlt wird. Erhöhe den monatlichen Zusatzbetrag oder wende dich an eine Schuldenberatung (siehe unten).";
       resultsEl.appendChild(warn);
       return;
     }
@@ -239,9 +400,18 @@
     list.className = "payoff-order-list";
     result.order.forEach((entry) => {
       const li = document.createElement("li");
-      const monthsToPayoff = entry.payoffMonth;
-      li.textContent = `${entry.name} – schuldenfrei nach ${monthsToPayoff} Monaten (Zinsen: ${formatChf(entry.interestPaid)})`;
+      li.textContent = `${entry.name} – schuldenfrei nach ${entry.payoffMonth} Monaten (Zinsen: ${formatChf(entry.interestPaid)})`;
       list.appendChild(li);
+
+      if (strategy === "urgency") {
+        const type = CREDITOR_TYPE_BY_ID[entry.creditorType];
+        if (type) {
+          const reason = document.createElement("p");
+          reason.className = "urgency-reason";
+          reason.textContent = `${type.label}: ${type.reason}`;
+          li.appendChild(reason);
+        }
+      }
     });
     resultsEl.appendChild(list);
   }

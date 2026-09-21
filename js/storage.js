@@ -6,6 +6,8 @@
  */
 const Storage = {
   DEBTS_KEY: "ssv_debts_v1",
+  INCOME_KEY: "ssv_income_v1",
+  FIXED_COSTS_KEY: "ssv_fixed_costs_v1",
   SETTINGS_KEY: "ssv_settings_v1",
 
   loadDebts() {
@@ -22,6 +24,40 @@ const Storage = {
       localStorage.setItem(this.DEBTS_KEY, JSON.stringify(debts));
     } catch (e) {
       /* ignore -- data just won't persist across reloads */
+    }
+  },
+
+  loadIncome() {
+    try {
+      const raw = localStorage.getItem(this.INCOME_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveIncome(income) {
+    try {
+      localStorage.setItem(this.INCOME_KEY, JSON.stringify(income));
+    } catch (e) {
+      /* ignore */
+    }
+  },
+
+  loadFixedCosts() {
+    try {
+      const raw = localStorage.getItem(this.FIXED_COSTS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveFixedCosts(fixedCosts) {
+    try {
+      localStorage.setItem(this.FIXED_COSTS_KEY, JSON.stringify(fixedCosts));
+    } catch (e) {
+      /* ignore */
     }
   },
 

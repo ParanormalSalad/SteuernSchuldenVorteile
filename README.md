@@ -16,10 +16,17 @@ Betr&auml;ge usw.) werden nur im Browser der Person gespeichert, die die Seite g
 
 | Modul | Status |
 |---|---|
-| Schuldenplaner (Avalanche/Snowball-Abzahlungsplan) | ✅ funktioniert, regionsunabh&auml;ngig |
+| Einkommen & Fixkosten (errechnet, was monatlich f&uuml;r Schulden &uuml;brig bleibt) | ✅ funktioniert |
+| Schuldenplaner (Lawine/Schneeball/Dringlichkeit-Abzahlungsplan) | ✅ funktioniert, regionsunabh&auml;ngig |
 | Finanzhilfen-Finder (z.B. Erg&auml;nzungsleistungen, Pr&auml;mienverbilligung) | 🔜 als N&auml;chstes geplant |
 | Steuer-Helfer (Sch&auml;tzung/Checkliste f&uuml;r die Steuererkl&auml;rung) | 🔜 sp&auml;ter geplant |
 | Regionen mit echten Daten hinterlegt | Kanton St. Gallen (Schweiz) |
+
+Die dritte Strategie **"Dringlichkeit"** sortiert Schulden nicht nach Zinssatz oder Betrag,
+sondern danach, wie ernst die Konsequenzen bei Nichtzahlung sind (z.B. AHV/Ausgleichskasse,
+Krankenkasse und Vermieter betreiben typischerweise schnell und konsequent). Das ist eine
+allgemeine Einsch&auml;tzung, keine Rechtsberatung &mdash; die Liste der Gl&auml;ubiger-Typen und ihre
+Dringlichkeit stehen in `js/creditorTypes.js`.
 
 Die Regionsauswahl (Land + Kanton/Bundesland) ist schon f&uuml;r alle Kantone der Schweiz sowie
 alle Bundesl&auml;nder Deutschlands und &Ouml;sterreichs vorbereitet ("Bald verf&uuml;gbar"), damit sich
@@ -58,13 +65,14 @@ Seite &ouml;ffentlich erreichbar ist &mdash; niemand ausser ihr sieht ihre Eintr
 ## Projektstruktur
 
 ```
-index.html          Seitenstruktur (HTML)
-css/style.css        Aussehen (hell/dunkel, mobilfreundlich)
-js/regions.js        Alle L&auml;nder/Kantone/Bundesl&auml;nder + regionale Infos (St. Gallen ausgef&uuml;llt)
-js/storage.js        Speichern/Laden im Browser (localStorage)
-js/debtPlanner.js    Die eigentliche Berechnung des Abzahlungsplans
-js/chart.js          Einfaches Diagramm (Restschuld &uuml;ber Zeit), ohne externe Bibliothek
-js/app.js            Verbindet alles: F&uuml;llt die Seite, reagiert auf Klicks/Eingaben
+index.html            Seitenstruktur (HTML)
+css/style.css          Aussehen (hell/dunkel, mobilfreundlich)
+js/regions.js          Alle L&auml;nder/Kantone/Bundesl&auml;nder + regionale Infos (St. Gallen ausgef&uuml;llt)
+js/creditorTypes.js    Gl&auml;ubiger-Typen (Vermieter, Krankenkasse, AHV/IV, ...) + Dringlichkeit
+js/storage.js          Speichern/Laden im Browser (localStorage)
+js/debtPlanner.js      Die eigentliche Berechnung des Abzahlungsplans
+js/chart.js            Einfaches Diagramm (Restschuld &uuml;ber Zeit), ohne externe Bibliothek
+js/app.js              Verbindet alles: F&uuml;llt die Seite, reagiert auf Klicks/Eingaben
 ```
 
 Kein Build-Schritt, kein `npm install`, keine Frameworks &mdash; nur normales HTML/CSS/JavaScript,
