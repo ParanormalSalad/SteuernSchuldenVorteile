@@ -67,9 +67,15 @@
       });
     });
 
-    renderDebtTable();
-    renderIncomeTable();
-    renderFixedCostsTable();
+    // start every list with one blank, ready-to-type row instead of an
+    // empty table with nothing to click into
+    if (debts.length === 0) addDebtRow();
+    else renderDebtTable();
+    if (income.length === 0) addIncomeRow();
+    else renderIncomeTable();
+    if (fixedCosts.length === 0) addFixedCostRow();
+    else renderFixedCostsTable();
+
     renderBudgetSummary();
     renderResources();
   }
@@ -162,7 +168,7 @@
       const td = document.createElement("td");
       td.colSpan = 6;
       td.className = "empty-state";
-      td.textContent = "Noch keine Schulden erfasst. Füge unten die erste Schuld hinzu.";
+      td.textContent = "Noch keine Schulden erfasst. Klicke auf «Schuld hinzufügen».";
       tr.appendChild(td);
       debtTableBody.appendChild(tr);
       return;
@@ -218,7 +224,7 @@
   }
 
   function renderIncomeTable() {
-    renderAmountTable(incomeTableBody, income, "Noch kein Einkommen erfasst.", "z.B. Lohn, AHV-Rente", persistIncome, removeIncomeRow);
+    renderAmountTable(incomeTableBody, income, "Noch kein Einkommen erfasst. Klicke auf «Einkommen hinzufügen».", "z.B. Lohn, AHV-Rente", persistIncome, removeIncomeRow);
   }
 
   function addFixedCostRow() {
@@ -239,7 +245,7 @@
   }
 
   function renderFixedCostsTable() {
-    renderAmountTable(fixedCostsTableBody, fixedCosts, "Noch keine Fixkosten erfasst.", "z.B. Miete, Krankenkasse, Strom", persistFixedCosts, removeFixedCostRow);
+    renderAmountTable(fixedCostsTableBody, fixedCosts, "Noch keine Fixkosten erfasst. Klicke auf «Fixkosten hinzufügen».", "z.B. Miete, Krankenkasse, Strom", persistFixedCosts, removeFixedCostRow);
   }
 
   function renderAmountTable(tbody, items, emptyText, placeholder, onChange, onRemove) {
