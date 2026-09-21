@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finanzassistent &ndash; Schulden, Steuern &amp; Finanzhilfen</title>
-<link rel="stylesheet" href="css/style.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=14">
 </head>
 <body>
 
@@ -69,6 +69,23 @@
     <div id="budget-summary" class="budget-summary"></div>
   </section>
 
+  <section id="adhoc" class="card adhoc-card">
+    <h2>Sofortzahlungen diesen Monat</h2>
+    <p>Unerwartete Rechnungen, die <strong>jetzt sofort</strong> bezahlt werden m&uuml;ssen (z.B. ein neuer Pneu) &mdash;
+       anders als Fixkosten sind das keine wiederkehrenden Ausgaben. Sie reduzieren nur diesen Monat, wie viel f&uuml;r
+       Schulden &uuml;brig bleibt; ab n&auml;chstem Monat gilt wieder der normale Betrag. L&ouml;sche einen Eintrag, sobald
+       er bezahlt ist.</p>
+    <table id="adhoc-table" class="entry-table">
+      <thead>
+        <tr><th>Bezeichnung</th><th>Betrag (CHF)</th><th></th></tr>
+      </thead>
+      <tbody id="adhoc-table-body"></tbody>
+    </table>
+    <button id="add-adhoc-btn" type="button" class="secondary-btn">+ Sofortzahlung hinzuf&uuml;gen</button>
+
+    <div id="adhoc-summary"></div>
+  </section>
+
   <section id="debt-planner" class="tab-panel card active">
     <h2>Schuldenplaner</h2>
     <p>Erfasse alle Schulden mit Restschuld und Zinssatz (falls bekannt) &mdash; keine Mindestzahlung n&ouml;tig, du zahlst ja
@@ -116,11 +133,11 @@
 
 <!-- ?v=N is a cache-buster: bump it whenever any js/*.js or css file changes,
      so returning visitors get the new version without needing a hard refresh. -->
-<script src="js/regions.js?v=13"></script>
-<script src="js/creditorTypes.js?v=13"></script>
-<script src="js/storage.js?v=13"></script>
-<script src="js/debtPlanner.js?v=13"></script>
-<script src="js/chart.js?v=13"></script>
-<script src="js/app.js?v=13"></script>
+<script src="js/regions.js?v=14"></script>
+<script src="js/creditorTypes.js?v=14"></script>
+<script src="js/storage.js?v=14"></script>
+<script src="js/debtPlanner.js?v=14"></script>
+<script src="js/chart.js?v=14"></script>
+<script src="js/app.js?v=14"></script>
 </body>
 </html>

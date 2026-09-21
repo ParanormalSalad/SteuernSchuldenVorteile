@@ -21,6 +21,7 @@ Daten.)
 | Modul | Status |
 |---|---|
 | Einkommen & Fixkosten (errechnet, was monatlich f&uuml;r Schulden &uuml;brig bleibt, live) | ✅ funktioniert |
+| Sofortzahlungen diesen Monat (unerwartete Rechnungen, reduzieren nur den aktuellen Monat) | ✅ funktioniert |
 | Schuldenplaner (alle Schulden gleichzeitig, Extra-Betrag gleichm&auml;ssig aufgeteilt) | ✅ funktioniert, regionsunabh&auml;ngig |
 | Finanzhilfen-Finder (z.B. Erg&auml;nzungsleistungen, Pr&auml;mienverbilligung) | 🔜 als N&auml;chstes geplant |
 | Steuer-Helfer (Sch&auml;tzung/Checkliste f&uuml;r die Steuererkl&auml;rung) | 🔜 sp&auml;ter geplant |
@@ -39,6 +40,14 @@ Ausgleichskasse und Krankenkasse betreiben typischerweise schnell, Miete kann zu
 f&uuml;hren). Das ist nur Orientierung, keine Rechtsberatung, und &auml;ndert nichts an der
 Zahlung selbst &mdash; alle Schulden werden weiterhin gleich bedient. Die Liste der Gl&auml;ubiger-
 Typen und ihre Dringlichkeit stehen in `js/creditorTypes.js`.
+
+**Sofortzahlungen** (z.B. "musste jetzt einen neuen Pneu kaufen") sind bewusst getrennt von
+Fixkosten: sie sind einmalig, nicht wiederkehrend. Sie werden im Abschnitt "Sofortzahlungen diesen
+Monat" erfasst und reduzieren nur, wie viel *diesen* Monat f&uuml;r Schulden &uuml;brig bleibt und
+pro Schuld ausgezahlt wird &mdash; der langfristige Zahlungsplan (Monate, Gesamtzinsen, Diagramm)
+geht weiterhin vom normalen monatlichen Betrag aus, da eine einmalige Ausgabe die Dauerrechnung
+nicht verf&auml;lschen soll. Ein Eintrag sollte gel&ouml;scht werden, sobald er bezahlt ist &mdash;
+die App kennt kein Kalenderdatum und wei&szlig; daher nicht von selbst, wann ein neuer Monat beginnt.
 
 Die Regionsauswahl (Land + Kanton/Bundesland) ist schon f&uuml;r alle Kantone der Schweiz sowie
 alle Bundesl&auml;nder Deutschlands und &Ouml;sterreichs vorbereitet ("Bald verf&uuml;gbar"), damit sich

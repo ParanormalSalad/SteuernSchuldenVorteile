@@ -2,6 +2,7 @@
   let debts = Storage.loadDebts();
   let income = Storage.loadIncome();
   let fixedCosts = Storage.loadFixedCosts();
+  let adHoc = Storage.loadAdHoc();
   const settings = Object.assign({ country: "CH", subdivision: "SG" }, Storage.loadSettings());
 
   const countrySelect = document.getElementById("country-select");
@@ -12,6 +13,8 @@
   const debtTableBody = document.getElementById("debt-table-body");
   const incomeTableBody = document.getElementById("income-table-body");
   const fixedCostsTableBody = document.getElementById("fixed-costs-table-body");
+  const adhocTableBody = document.getElementById("adhoc-table-body");
+  const adhocSummaryEl = document.getElementById("adhoc-summary");
   const budgetSummaryEl = document.getElementById("budget-summary");
   const extraPaymentInput = document.getElementById("extra-payment");
   const extraPaymentSuggestion = document.getElementById("extra-payment-suggestion");
@@ -20,6 +23,7 @@
   let nextDebtId = debts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
   let nextIncomeId = income.reduce((max, d) => Math.max(max, d.id), 0) + 1;
   let nextFixedCostId = fixedCosts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
+  let nextAdhocId = adHoc.reduce((max, d) => Math.max(max, d.id), 0) + 1;
 
   // tracks the value we last set extra-payment to automatically, so we can
   // tell "still following the computed maximum" apart from "user typed
@@ -52,6 +56,7 @@
     document.getElementById("add-debt-btn").addEventListener("click", addDebtRow);
     document.getElementById("add-income-btn").addEventListener("click", addIncomeRow);
     document.getElementById("add-fixed-cost-btn").addEventListener("click", addFixedCostRow);
+    document.getElementById("add-adhoc-btn").addEventListener("click", addAdhocRow);
     document.getElementById("calculate-btn").addEventListener("click", calculate);
 
     if (extraPaymentInput.value === "0" && settings.extraPayment) {
@@ -71,6 +76,8 @@
     else renderIncomeTable();
     if (fixedCosts.length === 0) addFixedCostRow();
     else renderFixedCostsTable();
+    // ad-hoc expenses are the exception, not the norm -- no blank row seeded
+    renderAdhocTable();
 
     renderBudgetSummary();
     renderResources();
@@ -243,6 +250,27 @@
     renderAmountTable(fixedCostsTableBody, fixedCosts, "Noch keine Fixkosten erfasst. Klicke auf «Fixkosten hinzufügen».", "z.B. Miete, Krankenkasse, Strom", persistFixedCosts, removeFixedCostRow);
   }
 
+  function addAdhocRow() {
+    adHoc.push({ id: nextAdhocId++, name: "", amount: "" });
+    persistAdhoc();
+    renderAdhocTable();
+  }
+
+  function removeAdhocRow(id) {
+    adHoc = adHoc.filter((d) => d.id !== id);
+    persistAdhoc();
+    renderAdhocTable();
+  }
+
+  function persistAdhoc() {
+    Storage.saveAdHoc(adHoc);
+    renderBudgetSummary();
+  }
+
+  function renderAdhocTable() {
+    renderAmountTable(adhocTableBody, adHoc, "Keine Sofortzahlungen diesen Monat.", "z.B. neuer Pneu", persistAdhoc, removeAdhocRow);
+  }
+
   function renderAmountTable(tbody, items, emptyText, placeholder, onChange, onRemove) {
     tbody.innerHTML = "";
     if (items.length === 0) {
@@ -368,7 +396,44 @@
       }
     }
 
+    renderAdhocSummary(available, hasDebt);
+
     if (hasDebt) calculate();
+  }
+
+  /*
+   * Sofortzahlungen are one-off, not recurring like Fixkosten -- they
+   * only reduce what's left for debt THIS month, never the ongoing
+   * plan below. Kept as a separate figure rather than folded into the
+   * main simulation, which assumes a constant monthly budget.
+   */
+  function renderAdhocSummary(normalAvailable, hasDebt) {
+    const totalAdhoc = sumAmounts(adHoc);
+    adhocSummaryEl.innerHTML = "";
+
+    if (totalAdhoc <= 0) return;
+
+    const openDebtCount = debts.filter((d) => d.name && Number(d.balance) > 0).length;
+    const normalShare = openDebtCount > 0 ? normalAvailable / openDebtCount : 0;
+    const reducedAvailable = Math.max(0, normalAvailable - totalAdhoc);
+    const reducedShare = openDebtCount > 0 ? reducedAvailable / openDebtCount : 0;
+
+    const box = document.createElement("div");
+    box.className = "adhoc-summary-box";
+    box.innerHTML = `
+      <div class="budget-line"><span>Normal verfügbar für Schulden</span><span>${formatChf(normalAvailable)}</span></div>
+      <div class="budget-line"><span>Sofortzahlungen diesen Monat</span><span>&minus; ${formatChf(totalAdhoc)}</span></div>
+      <div class="budget-line total"><span>Diesen Monat für Schulden übrig</span><span>${formatChf(reducedAvailable)}</span></div>
+    `;
+
+    if (hasDebt && openDebtCount > 0) {
+      const p = document.createElement("p");
+      p.className = "urgency-reason";
+      p.textContent = `Diesen Monat bekommt jede offene Schuld ${formatChf(reducedShare)} statt ${formatChf(normalShare)}. Ab nächstem Monat gilt wieder der normale Betrag (sofern keine weiteren Sofortzahlungen anfallen) – der Zahlungsplan unten geht weiterhin vom normalen Betrag aus.`;
+      box.appendChild(p);
+    }
+
+    adhocSummaryEl.appendChild(box);
   }
 
   // ---- Calculation ----

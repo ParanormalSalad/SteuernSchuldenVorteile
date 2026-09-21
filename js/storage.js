@@ -10,6 +10,7 @@ const Storage = {
   DEBTS_KEY: "ssv_debts_v1",
   INCOME_KEY: "ssv_income_v1",
   FIXED_COSTS_KEY: "ssv_fixed_costs_v1",
+  ADHOC_KEY: "ssv_adhoc_v1",
   SETTINGS_KEY: "ssv_settings_v1",
 
   loadDebts() {
@@ -58,6 +59,23 @@ const Storage = {
   saveFixedCosts(fixedCosts) {
     try {
       localStorage.setItem(this.FIXED_COSTS_KEY, JSON.stringify(fixedCosts));
+    } catch (e) {
+      /* ignore */
+    }
+  },
+
+  loadAdHoc() {
+    try {
+      const raw = localStorage.getItem(this.ADHOC_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveAdHoc(adHoc) {
+    try {
+      localStorage.setItem(this.ADHOC_KEY, JSON.stringify(adHoc));
     } catch (e) {
       /* ignore */
     }
