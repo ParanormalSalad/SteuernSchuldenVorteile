@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finanzassistent &ndash; Schulden, Steuern &amp; Finanzhilfen</title>
-<link rel="stylesheet" href="css/style.css?v=11">
+<link rel="stylesheet" href="css/style.css?v=12">
 </head>
 <body>
 
@@ -21,24 +21,23 @@
 </div>
 
 <section id="profile-picker" class="card profile-picker">
-  <h2>Wer bist du?</h2>
-  <p>Jede Person bekommt ein eigenes, leeres Profil &mdash; niemand sieht die Zahlen einer anderen Person. W&auml;hle dein
-     bestehendes Profil oder leg ein neues an.</p>
-  <div id="profile-list" class="profile-list"></div>
-  <div class="profile-new">
-    <input type="text" id="new-profile-name" placeholder="Dein Name">
-    <button id="create-profile-btn" type="button" class="primary-btn">Neues Profil anlegen</button>
-  </div>
-  <p class="strategy-note">Hinweis: Das ist kein Passwortschutz. Es trennt nur die Ansicht, damit sich Personen, die denselben
-     Browser nutzen, nicht gegenseitig ihre Zahlen sehen &mdash; wer Zugriff auf dieses Ger&auml;t hat, kann grunds&auml;tzlich
-     jedes Profil ausw&auml;hlen.</p>
+  <h2>Zugang</h2>
+  <p>Gib einen Namen oder ein kurzes, selbst ausgedachtes Kennwort ein. Jede unterschiedliche Eingabe bekommt einen eigenen,
+     leeren Bereich. Es gibt keine Liste gespeicherter Namen &mdash; die App merkt sich nirgends, wer sie schon benutzt hat
+     oder mit welchem Namen, auch fremde Personen sehen hier nichts von dir.</p>
+  <form id="profile-form" class="profile-form">
+    <input type="password" id="profile-key-input" placeholder="Name oder Kennwort" autocomplete="off">
+    <button type="submit" class="primary-btn">Weiter</button>
+  </form>
+  <p class="strategy-note">Hinweis: Das ist kein echter Passwortschutz &mdash; wer denselben Text eingibt (z.B. denselben
+     h&auml;ufigen Vornamen), landet im selben Bereich. Je ungew&ouml;hnlicher deine Eingabe, desto sicherer bleibt sie privat.</p>
 </section>
 
 <div id="app-content" hidden>
 
 <div class="profile-bar">
-  <span>Profil: <strong id="current-profile-name"></strong></span>
-  <button id="switch-profile-btn" type="button" class="secondary-btn">Profil wechseln</button>
+  <span>Angemeldet</span>
+  <button id="logout-btn" type="button" class="secondary-btn">Abmelden</button>
 </div>
 
 <nav class="tabs" id="tabs">
@@ -139,12 +138,12 @@
 
 <!-- ?v=N is a cache-buster: bump it whenever any js/*.js or css file changes,
      so returning visitors get the new version without needing a hard refresh. -->
-<script src="js/regions.js?v=11"></script>
-<script src="js/creditorTypes.js?v=11"></script>
-<script src="js/storage.js?v=11"></script>
-<script src="js/profiles.js?v=11"></script>
-<script src="js/debtPlanner.js?v=11"></script>
-<script src="js/chart.js?v=11"></script>
-<script src="js/app.js?v=11"></script>
+<script src="js/regions.js?v=12"></script>
+<script src="js/creditorTypes.js?v=12"></script>
+<script src="js/storage.js?v=12"></script>
+<script src="js/profiles.js?v=12"></script>
+<script src="js/debtPlanner.js?v=12"></script>
+<script src="js/chart.js?v=12"></script>
+<script src="js/app.js?v=12"></script>
 </body>
 </html>

@@ -530,105 +530,42 @@
     return "CHF " + Math.round(v).toLocaleString("de-CH");
   }
 
-  // ---- Profile picker (gates everything above) ----
+  // ---- Access (gates everything above) ----
+  // No roster of names is ever stored or shown, and nothing about a
+  // previous visit is remembered: every page load starts at a blank
+  // entry field. What's typed is hashed straight into a storage
+  // namespace (see js/profiles.js) -- nothing to see for whoever opens
+  // this next unless they type the exact same text themselves.
 
-  const LAST_PROFILE_KEY = "ssv_last_profile_id";
   const profilePickerEl = document.getElementById("profile-picker");
-  const profileListEl = document.getElementById("profile-list");
-  const newProfileNameInput = document.getElementById("new-profile-name");
+  const profileForm = document.getElementById("profile-form");
+  const profileKeyInput = document.getElementById("profile-key-input");
   const appContentEl = document.getElementById("app-content");
-  const currentProfileNameEl = document.getElementById("current-profile-name");
 
-  function getLastProfileId() {
-    try {
-      return localStorage.getItem(LAST_PROFILE_KEY);
-    } catch (e) {
-      return null;
-    }
+  // best-effort cleanup of the old roster-based approach's data, which
+  // stored plaintext names -- exactly what this replaces
+  try {
+    localStorage.removeItem("ssv_profiles_v1");
+    localStorage.removeItem("ssv_last_profile_id");
+  } catch (e) {
+    /* ignore */
   }
 
-  function setLastProfileId(id) {
-    try {
-      localStorage.setItem(LAST_PROFILE_KEY, id || "");
-    } catch (e) {
-      /* ignore */
-    }
-  }
-
-  function renderProfilePicker() {
-    const profiles = Profiles.list();
-    profileListEl.innerHTML = "";
-    if (profiles.length === 0) {
-      const p = document.createElement("p");
-      p.className = "empty-state";
-      p.textContent = "Noch keine Profile vorhanden. Leg unten das erste an.";
-      profileListEl.appendChild(p);
+  profileForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const raw = profileKeyInput.value.trim();
+    if (!raw) {
+      profileKeyInput.focus();
       return;
     }
-    profiles.forEach((profile) => {
-      const row = document.createElement("div");
-      row.className = "profile-row";
-
-      const selectBtn = document.createElement("button");
-      selectBtn.type = "button";
-      selectBtn.className = "profile-select-btn";
-      selectBtn.textContent = profile.name;
-      selectBtn.addEventListener("click", () => selectProfile(profile.id));
-      row.appendChild(selectBtn);
-
-      const delBtn = document.createElement("button");
-      delBtn.type = "button";
-      delBtn.className = "remove-row-btn";
-      delBtn.title = "Profil und alle Daten löschen";
-      delBtn.textContent = "✕";
-      delBtn.addEventListener("click", () => {
-        if (confirm(`Profil «${profile.name}» und alle gespeicherten Daten unwiderruflich löschen?`)) {
-          Profiles.remove(profile.id);
-          if (getLastProfileId() === profile.id) setLastProfileId("");
-          renderProfilePicker();
-        }
-      });
-      row.appendChild(delBtn);
-
-      profileListEl.appendChild(row);
-    });
-  }
-
-  function selectProfile(id) {
-    const profile = Profiles.list().find((p) => p.id === id);
-    if (!profile) return;
-    setLastProfileId(id);
     profilePickerEl.hidden = true;
     appContentEl.hidden = false;
-    currentProfileNameEl.textContent = profile.name;
-    startApp(id);
-  }
-
-  document.getElementById("create-profile-btn").addEventListener("click", () => {
-    const name = newProfileNameInput.value.trim();
-    if (!name) {
-      newProfileNameInput.focus();
-      return;
-    }
-    const profile = Profiles.create(name);
-    newProfileNameInput.value = "";
-    selectProfile(profile.id);
-  });
-  newProfileNameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") document.getElementById("create-profile-btn").click();
+    startApp(deriveProfileId(raw));
   });
 
-  document.getElementById("switch-profile-btn").addEventListener("click", () => {
-    // a fresh reload guarantees no leftover event listeners / in-memory
-    // state from the previous profile leak into the next one
-    setLastProfileId("");
+  document.getElementById("logout-btn").addEventListener("click", () => {
+    // reload rather than manually resetting in-memory state -- guarantees
+    // nothing from this session lingers for whoever uses the browser next
     location.reload();
   });
-
-  renderProfilePicker();
-  const lastProfileId = getLastProfileId();
-  const lastProfile = Profiles.list().find((p) => p.id === lastProfileId);
-  if (lastProfile) {
-    selectProfile(lastProfile.id);
-  }
 })();

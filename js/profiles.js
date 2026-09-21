@@ -1,41 +1,18 @@
 /*
- * Manages the list of local profiles (just id + display name, no
- * financial data) so several people can use this app on one browser
- * without seeing each other's numbers. Not a login / password system
- * -- anyone with access to this browser can pick any profile. It only
- * keeps each person's numbers out of the way by default.
+ * Turns whatever someone types (a name, a short passphrase -- their
+ * choice) into a storage namespace. Nothing about who has used the
+ * app before is ever stored or shown: there is no list of "known"
+ * profiles anywhere. Typing the same text again later returns to the
+ * same data; typing something else (as a stranger naturally would)
+ * gets a separate, empty space. This is not authentication -- anyone
+ * who types the same text lands in the same space, so a short
+ * made-up phrase is safer than a common first name alone.
  */
-const Profiles = {
-  LIST_KEY: "ssv_profiles_v1",
-
-  list() {
-    try {
-      const raw = localStorage.getItem(this.LIST_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
-  },
-
-  _save(list) {
-    try {
-      localStorage.setItem(this.LIST_KEY, JSON.stringify(list));
-    } catch (e) {
-      /* ignore */
-    }
-  },
-
-  create(name) {
-    const profile = { id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), name };
-    const list = this.list();
-    list.push(profile);
-    this._save(list);
-    return profile;
-  },
-
-  remove(profileId) {
-    const list = this.list().filter((p) => p.id !== profileId);
-    this._save(list);
-    Storage.wipeProfile(profileId);
+function deriveProfileId(text) {
+  const normalized = text.trim().toLowerCase();
+  let hash = 5381;
+  for (let i = 0; i < normalized.length; i++) {
+    hash = ((hash << 5) + hash + normalized.charCodeAt(i)) | 0; // djb2
   }
-};
+  return "u" + (hash >>> 0).toString(36);
+}

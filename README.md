@@ -12,12 +12,15 @@ kontaktieren (siehe Abschnitt "Hilfe in deiner Region" in der App).
 Betr&auml;ge usw.) werden nur im Browser der Person gespeichert, die die Seite ge&ouml;ffnet hat
 (`localStorage`). Es wird nichts irgendwohin verschickt.
 
-**Mehrere Personen auf demselben Ger&auml;t:** Beim ersten &Ouml;ffnen fragt die App "Wer bist
-du?" und legt pro Name ein eigenes, komplett getrenntes Profil an &mdash; jede Person sieht nur
-ihre eigenen Zahlen, neue Profile starten leer. Das ist kein Passwortschutz (keine echte
-Sicherheit vor jemandem, der Zugriff auf das Ger&auml;t hat), sondern trennt nur die Ansicht, damit
-sich Familienmitglieder nicht gegenseitig aus Versehen ihre Zahlen zeigen. Mit "Profil wechseln"
-oben in der App kann man jederzeit wechseln oder ein Profil (inkl. aller Daten) l&ouml;schen.
+**Mehrere Personen auf demselben Ger&auml;t:** Beim &Ouml;ffnen fragt die App nach einem Namen
+oder selbst ausgedachten Kennwort und rechnet daraus einen eigenen, komplett getrennten Bereich aus
+&mdash; jede Eingabe bekommt ihre eigenen Zahlen, andere Eingaben starten leer. Es gibt **keine
+Liste gespeicherter Namen** und **kein automatisches Wiedereinloggen**: jeder Seitenaufruf zeigt
+ein leeres Eingabefeld, ganz ohne Hinweis darauf, wer die App vorher benutzt hat. Das ist kein
+echter Passwortschutz (wer denselben Text eingibt, z.B. denselben h&auml;ufigen Vornamen, landet im
+selben Bereich), sondern trennt nur die Ansicht, damit sich Familienmitglieder oder auch fremde
+Personen am selben Ger&auml;t nicht gegenseitig ihre Zahlen zeigen. Mit "Abmelden" oben in der App
+kehrt man jederzeit zum leeren Eingabefeld zur&uuml;ck.
 
 ## Aktueller Stand
 
@@ -90,7 +93,7 @@ index.html            Seitenstruktur (HTML)
 css/style.css          Aussehen (hell/dunkel, mobilfreundlich)
 js/regions.js          Alle L&auml;nder/Kantone/Bundesl&auml;nder + regionale Infos (St. Gallen ausgef&uuml;llt)
 js/creditorTypes.js    Gl&auml;ubiger-Typen zur Kategorisierung (Vermieter, Krankenkasse, AHV/IV, ...)
-js/profiles.js         Liste der lokalen Profile (nur Name + ID, keine Finanzdaten)
+js/profiles.js         Wandelt Name/Kennwort in eine Speicher-ID um, speichert selbst nichts
 js/storage.js          Speichern/Laden im Browser (localStorage), pro Profil getrennt
 js/debtPlanner.js      Die eigentliche Berechnung des Abzahlungsplans
 js/chart.js            Einfaches Diagramm (Restschuld &uuml;ber Zeit), ohne externe Bibliothek
