@@ -319,29 +319,44 @@
     const totalFixedCosts = sumAmounts(fixedCosts);
     const totalMinPayments = sumMinPayments();
     const available = computeAvailableForDebt();
+    const maxExtra = Math.max(0, Math.round(available));
 
     budgetSummaryEl.innerHTML = `
       <div class="budget-line"><span>Einkommen</span><span>${formatChf(totalIncome)}</span></div>
       <div class="budget-line"><span>Fixkosten</span><span>&minus; ${formatChf(totalFixedCosts)}</span></div>
       <div class="budget-line"><span>Mindestzahlungen Schulden</span><span>&minus; ${formatChf(totalMinPayments)}</span></div>
       <div class="budget-line total ${available < 0 ? "negative" : ""}">
-        <span>${available < 0 ? "Fehlbetrag" : "Verfügbar für zusätzliche Schuldentilgung"}</span>
+        <span>${available < 0 ? "Fehlbetrag" : "Maximum, das du zusätzlich für Schulden einsetzen kannst"}</span>
         <span>${formatChf(available)}</span>
       </div>
       ${available < 0 ? '<p class="urgency-reason">Deine Fixkosten und Mindestzahlungen übersteigen dein Einkommen. Wende dich möglichst bald an eine Schuldenberatung (siehe unten) – ggf. gibt es Anspruch auf staatliche Unterstützung.</p>' : ""}
     `;
 
+    if (available > 0 && debts.some((d) => d.name && Number(d.balance) > 0)) {
+      const maxBtn = document.createElement("button");
+      maxBtn.type = "button";
+      maxBtn.className = "primary-btn";
+      maxBtn.textContent = `Mit maximalem Betrag (${formatChf(maxExtra)}) schneller abzahlen`;
+      maxBtn.addEventListener("click", () => {
+        extraPaymentInput.value = maxExtra;
+        settings.extraPayment = String(maxExtra);
+        Storage.saveSettings(settings);
+        calculate();
+        resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      budgetSummaryEl.appendChild(maxBtn);
+    }
+
     extraPaymentSuggestion.innerHTML = "";
     if (income.length > 0 || fixedCosts.length > 0) {
-      const suggested = Math.max(0, Math.round(available));
       const span = document.createElement("span");
-      span.textContent = `Aus Einkommen und Fixkosten errechnet: ${formatChf(suggested)}. `;
+      span.textContent = `Maximum aus Einkommen und Fixkosten: ${formatChf(maxExtra)}. `;
       const btn = document.createElement("button");
       btn.type = "button";
       btn.textContent = "Übernehmen";
       btn.addEventListener("click", () => {
-        extraPaymentInput.value = suggested;
-        settings.extraPayment = String(suggested);
+        extraPaymentInput.value = maxExtra;
+        settings.extraPayment = String(maxExtra);
         Storage.saveSettings(settings);
       });
       extraPaymentSuggestion.appendChild(span);
