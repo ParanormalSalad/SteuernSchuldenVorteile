@@ -91,11 +91,49 @@ const DebtPlanner = {
           id,
           name: original.name,
           creditorType: original.creditorType || DEFAULT_CREDITOR_TYPE,
+          minPayment: Number(original.minPayment) || 0,
           payoffMonth: payoffMonth[id],
           interestPaid: interestPaid[id]
         };
       })
     };
+  },
+
+  /*
+   * Turns the payoff order into a concrete "who gets how many CHF, and
+   * until when" schedule. A new phase starts every time a debt is fully
+   * paid off, because that's when its minimum payment frees up and
+   * joins the extra pool for the next target -- so the payment amounts
+   * only change at those points, not every single month.
+   */
+  derivePaymentPlan(order, extraMonthly) {
+    let openDebts = order.map((d) => ({ id: d.id, name: d.name, minPayment: d.minPayment }));
+    let extraPool = Number(extraMonthly) || 0;
+    let prevMonth = 0;
+    const phases = [];
+
+    order.forEach((entry) => {
+      if (entry.payoffMonth === null) return;
+      const fromMonth = prevMonth + 1;
+      const toMonth = Math.max(entry.payoffMonth, fromMonth);
+
+      phases.push({
+        fromMonth,
+        toMonth,
+        targetName: entry.name,
+        payments: openDebts.map((d) => ({
+          id: d.id,
+          name: d.name,
+          amount: d.minPayment + (d.id === entry.id ? extraPool : 0)
+        }))
+      });
+
+      extraPool += entry.minPayment;
+      openDebts = openDebts.filter((d) => d.id !== entry.id);
+      prevMonth = entry.payoffMonth;
+    });
+
+    return phases;
   },
 
   _sortOrder(debts, strategy) {

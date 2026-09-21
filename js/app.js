@@ -398,6 +398,11 @@
     resultsEl.appendChild(canvas);
     Chart.drawBalanceHistory(canvas, result.balanceHistory);
 
+    const planTitle = document.createElement("h3");
+    planTitle.textContent = "Zahlungsplan: wie viel wohin, pro Monat";
+    resultsEl.appendChild(planTitle);
+    renderPaymentPlan(DebtPlanner.derivePaymentPlan(result.order, extra));
+
     const orderTitle = document.createElement("h3");
     orderTitle.textContent = "Abzahlungsreihenfolge";
     resultsEl.appendChild(orderTitle);
@@ -420,6 +425,48 @@
       }
     });
     resultsEl.appendChild(list);
+  }
+
+  function renderPaymentPlan(phases) {
+    const container = document.createElement("div");
+    container.className = "payment-plan";
+
+    phases.forEach((phase, index) => {
+      const card = document.createElement("div");
+      card.className = "phase-card";
+
+      const heading = document.createElement("h4");
+      const monthLabel = phase.fromMonth === phase.toMonth ? `Monat ${phase.fromMonth}` : `Monate ${phase.fromMonth}–${phase.toMonth}`;
+      heading.textContent = index === 0 ? `Ab jetzt (${monthLabel})` : `${monthLabel}`;
+      card.appendChild(heading);
+
+      const subtitle = document.createElement("p");
+      subtitle.className = "phase-subtitle";
+      subtitle.textContent = `Bis «${phase.targetName}» abbezahlt ist.`;
+      card.appendChild(subtitle);
+
+      const list = document.createElement("ul");
+      list.className = "phase-payments";
+      let total = 0;
+      phase.payments.forEach((p) => {
+        total += p.amount;
+        const li = document.createElement("li");
+        const isTarget = p.name === phase.targetName;
+        li.innerHTML = `<span>${p.name}${isTarget ? " (Ziel)" : ""}</span><span>${formatChf(p.amount)} / Monat</span>`;
+        if (isTarget) li.className = "target";
+        list.appendChild(li);
+      });
+      card.appendChild(list);
+
+      const totalLine = document.createElement("p");
+      totalLine.className = "phase-total";
+      totalLine.textContent = `Gesamt: ${formatChf(total)} / Monat`;
+      card.appendChild(totalLine);
+
+      container.appendChild(card);
+    });
+
+    resultsEl.appendChild(container);
   }
 
   function formatChf(v) {
