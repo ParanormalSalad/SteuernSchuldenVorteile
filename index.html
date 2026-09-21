@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finanzassistent &ndash; Schulden, Steuern &amp; Finanzhilfen</title>
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 
@@ -110,6 +110,10 @@
           <input type="radio" name="strategy" value="urgency">
           Dringlichkeit &mdash; zuerst die Schuld mit den ernstesten Konsequenzen (z.B. AHV oder Miete, die schnell betreiben)
         </label>
+        <label class="radio-label">
+          <input type="radio" name="strategy" value="equal">
+          Gleichm&auml;ssig &mdash; der Zusatzbetrag wird auf alle offenen Schulden gleich aufgeteilt, alle werden parallel abbezahlt (insgesamt meist etwas mehr Zinsen als bei Lawine/Schneeball)
+        </label>
       </fieldset>
     </div>
 
@@ -131,11 +135,11 @@
 
 <!-- ?v=N is a cache-buster: bump it whenever any js/*.js or css file changes,
      so returning visitors get the new version without needing a hard refresh. -->
-<script src="js/regions.js?v=6"></script>
-<script src="js/creditorTypes.js?v=6"></script>
-<script src="js/storage.js?v=6"></script>
-<script src="js/debtPlanner.js?v=6"></script>
-<script src="js/chart.js?v=6"></script>
-<script src="js/app.js?v=6"></script>
+<script src="js/regions.js?v=7"></script>
+<script src="js/creditorTypes.js?v=7"></script>
+<script src="js/storage.js?v=7"></script>
+<script src="js/debtPlanner.js?v=7"></script>
+<script src="js/chart.js?v=7"></script>
+<script src="js/app.js?v=7"></script>
 </body>
 </html>

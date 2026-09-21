@@ -1,13 +1,15 @@
 /*
- * Debt payoff simulation: avalanche (highest interest first), snowball
- * (smallest balance first), or urgency (real-world consequences first,
- * e.g. rent/Krankenkasse/AHV, see creditorTypes.js). Every month,
- * interest accrues on every debt, minimum payments are made on every
- * debt, and any leftover "extra" budget is funnelled into the current
- * target debt. Once a debt hits zero, its minimum payment is freed up
- * and joins the extra pool for the next debt in line -- that roll-over
- * is what makes all three strategies pay off debt faster than paying
- * minimums alone.
+ * Debt payoff simulation with four strategies: avalanche (highest
+ * interest first), snowball (smallest balance first), urgency
+ * (real-world consequences first, e.g. rent/Krankenkasse/AHV, see
+ * creditorTypes.js), or equal (extra split evenly across every open
+ * debt at once). Every month, interest accrues on every debt and
+ * minimum payments are made on every debt; the three sequential
+ * strategies then funnel the whole extra budget into one target debt
+ * at a time, while equal splits it across all open debts. Once a debt
+ * hits zero, its minimum payment is freed up and joins the extra pool
+ * -- that roll-over is what makes every strategy pay off debt faster
+ * than paying minimums alone.
  */
 const DebtPlanner = {
   MAX_MONTHS: 600, // 50 years safety cap so a bad input can't loop forever
@@ -60,17 +62,34 @@ const DebtPlanner = {
         }
       }
 
-      // 2. funnel the extra budget (plus anything freed up) into the target debt(s), in order
+      // 2. distribute the extra budget (plus anything freed up)
       let available = extraPool + freedUpThisMonth;
-      for (const id of order) {
-        if (available <= 0) break;
-        const debt = debts.find((d) => d.id === id);
-        if (!debt || debt.balance <= 0.005) continue;
-        const payment = Math.min(available, debt.balance);
-        debt.balance -= payment;
-        available -= payment;
-        if (debt.balance <= 0.005 && payoffMonth[debt.id] === null) {
-          payoffMonth[debt.id] = month;
+      if (strategy === "equal") {
+        // split evenly across every debt that's still open
+        const openIds = debts.filter((d) => d.balance > 0.005).map((d) => d.id);
+        if (available > 0 && openIds.length > 0) {
+          const share = available / openIds.length;
+          for (const id of openIds) {
+            const debt = debts.find((d) => d.id === id);
+            const payment = Math.min(share, debt.balance);
+            debt.balance -= payment;
+            if (debt.balance <= 0.005 && payoffMonth[debt.id] === null) {
+              payoffMonth[debt.id] = month;
+            }
+          }
+        }
+      } else {
+        // funnel the whole amount into the target debt(s), in order
+        for (const id of order) {
+          if (available <= 0) break;
+          const debt = debts.find((d) => d.id === id);
+          if (!debt || debt.balance <= 0.005) continue;
+          const payment = Math.min(available, debt.balance);
+          debt.balance -= payment;
+          available -= payment;
+          if (debt.balance <= 0.005 && payoffMonth[debt.id] === null) {
+            payoffMonth[debt.id] = month;
+          }
         }
       }
 
@@ -100,31 +119,37 @@ const DebtPlanner = {
   },
 
   /*
-   * Turns the payoff order into a concrete "who gets how many CHF, and
-   * until when" schedule. A new phase starts every time a debt is fully
-   * paid off, because that's when its minimum payment frees up and
-   * joins the extra pool for the next target -- so the payment amounts
-   * only change at those points, not every single month.
+   * Turns the simulation result into a concrete "who gets how many CHF,
+   * and until when" schedule. A new phase starts every time a debt is
+   * fully paid off, because that's when its minimum payment frees up
+   * and joins the extra pool -- so the payment amounts only change at
+   * those points, not every single month. Phases are walked in the
+   * order debts actually get paid off (by payoffMonth), which for the
+   * sequential strategies matches `order` already, and for "equal" is
+   * whichever debt happens to hit zero first.
    */
-  derivePaymentPlan(order, extraMonthly) {
+  derivePaymentPlan(order, extraMonthly, strategy) {
+    const byPayoff = order.filter((d) => d.payoffMonth !== null).sort((a, b) => a.payoffMonth - b.payoffMonth);
     let openDebts = order.map((d) => ({ id: d.id, name: d.name, minPayment: d.minPayment }));
     let extraPool = Number(extraMonthly) || 0;
     let prevMonth = 0;
     const phases = [];
 
-    order.forEach((entry) => {
-      if (entry.payoffMonth === null) return;
+    byPayoff.forEach((entry) => {
       const fromMonth = prevMonth + 1;
       const toMonth = Math.max(entry.payoffMonth, fromMonth);
+      const isEqual = strategy === "equal";
+      const share = isEqual && openDebts.length > 0 ? extraPool / openDebts.length : extraPool;
 
       phases.push({
         fromMonth,
         toMonth,
         targetName: entry.name,
+        equalSplit: isEqual,
         payments: openDebts.map((d) => ({
           id: d.id,
           name: d.name,
-          amount: d.minPayment + (d.id === entry.id ? extraPool : 0)
+          amount: d.minPayment + (isEqual || d.id === entry.id ? share : 0)
         }))
       });
 
@@ -138,7 +163,9 @@ const DebtPlanner = {
 
   _sortOrder(debts, strategy) {
     const copy = [...debts];
-    if (strategy === "snowball") {
+    if (strategy === "equal") {
+      // no targeting order needed -- kept as entered, just for display
+    } else if (strategy === "snowball") {
       copy.sort((a, b) => a.balance - b.balance);
     } else if (strategy === "urgency") {
       copy.sort((a, b) => this._urgencyOf(b) - this._urgencyOf(a) || b.apr - a.apr);

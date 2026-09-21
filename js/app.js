@@ -21,6 +21,11 @@
   let nextIncomeId = income.reduce((max, d) => Math.max(max, d.id), 0) + 1;
   let nextFixedCostId = fixedCosts.reduce((max, d) => Math.max(max, d.id), 0) + 1;
 
+  // tracks the value we last set extra-payment to automatically, so we can
+  // tell "still following the computed maximum" apart from "user typed
+  // their own amount" without a separate flag
+  let lastAutoExtra = null;
+
   function init() {
     Object.keys(REGIONS).forEach((code) => {
       const opt = document.createElement("option");
@@ -55,6 +60,7 @@
     extraPaymentInput.addEventListener("change", () => {
       settings.extraPayment = extraPaymentInput.value;
       Storage.saveSettings(settings);
+      calculate();
     });
     if (settings.strategy) {
       const radio = document.querySelector(`input[name="strategy"][value="${settings.strategy}"]`);
@@ -64,6 +70,7 @@
       r.addEventListener("change", () => {
         settings.strategy = document.querySelector('input[name="strategy"]:checked').value;
         Storage.saveSettings(settings);
+        calculate();
       });
     });
 
@@ -332,36 +339,54 @@
       ${available < 0 ? '<p class="urgency-reason">Deine Fixkosten und Mindestzahlungen übersteigen dein Einkommen. Wende dich möglichst bald an eine Schuldenberatung (siehe unten) – ggf. gibt es Anspruch auf staatliche Unterstützung.</p>' : ""}
     `;
 
-    if (available > 0 && debts.some((d) => d.name && Number(d.balance) > 0)) {
-      const maxBtn = document.createElement("button");
-      maxBtn.type = "button";
-      maxBtn.className = "primary-btn";
-      maxBtn.textContent = `Mit maximalem Betrag (${formatChf(maxExtra)}) schneller abzahlen`;
-      maxBtn.addEventListener("click", () => {
-        extraPaymentInput.value = maxExtra;
-        settings.extraPayment = String(maxExtra);
-        Storage.saveSettings(settings);
-        calculate();
+    const hasDebt = debts.some((d) => d.name && Number(d.balance) > 0);
+
+    // keep the extra-payment field following the computed maximum
+    // automatically, unless the person typed their own amount in --
+    // that's what makes the plan below update itself live
+    const current = extraPaymentInput.value.trim();
+    const followingMax = current === "" || current === "0" || Number(current) === lastAutoExtra;
+    if (followingMax && maxExtra !== Number(current)) {
+      extraPaymentInput.value = maxExtra;
+      lastAutoExtra = maxExtra;
+      settings.extraPayment = String(maxExtra);
+      Storage.saveSettings(settings);
+    }
+
+    if (available > 0 && hasDebt) {
+      const jumpBtn = document.createElement("button");
+      jumpBtn.type = "button";
+      jumpBtn.className = "primary-btn";
+      jumpBtn.textContent = `Zu meinem Zahlungsplan springen (${formatChf(maxExtra)} / Monat) ↓`;
+      jumpBtn.addEventListener("click", () => {
         resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
       });
-      budgetSummaryEl.appendChild(maxBtn);
+      budgetSummaryEl.appendChild(jumpBtn);
     }
 
     extraPaymentSuggestion.innerHTML = "";
     if (income.length > 0 || fixedCosts.length > 0) {
       const span = document.createElement("span");
-      span.textContent = `Maximum aus Einkommen und Fixkosten: ${formatChf(maxExtra)}. `;
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = "Übernehmen";
-      btn.addEventListener("click", () => {
-        extraPaymentInput.value = maxExtra;
-        settings.extraPayment = String(maxExtra);
-        Storage.saveSettings(settings);
-      });
+      span.textContent = followingMax
+        ? `Zusatzbetrag folgt automatisch dem Maximum (${formatChf(maxExtra)}).`
+        : `Maximum aus Einkommen und Fixkosten: ${formatChf(maxExtra)}. `;
       extraPaymentSuggestion.appendChild(span);
-      extraPaymentSuggestion.appendChild(btn);
+      if (!followingMax) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Wieder auf Maximum setzen";
+        btn.addEventListener("click", () => {
+          extraPaymentInput.value = maxExtra;
+          lastAutoExtra = maxExtra;
+          settings.extraPayment = String(maxExtra);
+          Storage.saveSettings(settings);
+          calculate();
+        });
+        extraPaymentSuggestion.appendChild(btn);
+      }
     }
+
+    if (hasDebt) calculate();
   }
 
   // ---- Calculation ----
@@ -416,15 +441,16 @@
     const planTitle = document.createElement("h3");
     planTitle.textContent = "Zahlungsplan: wie viel wohin, pro Monat";
     resultsEl.appendChild(planTitle);
-    renderPaymentPlan(DebtPlanner.derivePaymentPlan(result.order, extra));
+    renderPaymentPlan(DebtPlanner.derivePaymentPlan(result.order, extra, strategy));
 
     const orderTitle = document.createElement("h3");
-    orderTitle.textContent = "Abzahlungsreihenfolge";
+    orderTitle.textContent = strategy === "equal" ? "Ergebnis pro Schuld" : "Abzahlungsreihenfolge";
     resultsEl.appendChild(orderTitle);
 
     const list = document.createElement("ol");
     list.className = "payoff-order-list";
-    result.order.forEach((entry) => {
+    const byPayoff = [...result.order].sort((a, b) => a.payoffMonth - b.payoffMonth);
+    byPayoff.forEach((entry) => {
       const li = document.createElement("li");
       li.textContent = `${entry.name} – schuldenfrei nach ${entry.payoffMonth} Monaten (Zinsen: ${formatChf(entry.interestPaid)})`;
       list.appendChild(li);
@@ -457,7 +483,9 @@
 
       const subtitle = document.createElement("p");
       subtitle.className = "phase-subtitle";
-      subtitle.textContent = `Bis «${phase.targetName}» abbezahlt ist.`;
+      subtitle.textContent = phase.equalSplit
+        ? `Alle offenen Schulden erhalten gleich viel extra, bis «${phase.targetName}» als erste davon fertig ist.`
+        : `Bis «${phase.targetName}» abbezahlt ist.`;
       card.appendChild(subtitle);
 
       const list = document.createElement("ul");
@@ -466,8 +494,10 @@
       phase.payments.forEach((p) => {
         total += p.amount;
         const li = document.createElement("li");
-        const isTarget = p.name === phase.targetName;
-        li.innerHTML = `<span>${p.name}${isTarget ? " (Ziel)" : ""}</span><span>${formatChf(p.amount)} / Monat</span>`;
+        const isTarget = !phase.equalSplit && p.name === phase.targetName;
+        const isFirstDone = phase.equalSplit && p.name === phase.targetName;
+        const suffix = isTarget ? " (Ziel)" : isFirstDone ? " (zuerst fertig)" : "";
+        li.innerHTML = `<span>${p.name}${suffix}</span><span>${formatChf(p.amount)} / Monat</span>`;
         if (isTarget) li.className = "target";
         list.appendChild(li);
       });
